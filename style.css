@@ -353,6 +353,19 @@ nav .btn:hover {
   background: #000;
 }
 
+/* Booking step 3 */
+.step-3 h3 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-3 p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: #444;
+}
+
+
 /* --- MOBILE: Booking Panel --- */
 @media (max-width: 600px) {
   .week-days {

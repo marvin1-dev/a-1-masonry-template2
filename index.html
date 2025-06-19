@@ -93,80 +93,80 @@
 
     <div class="column-right">
       <!-- STEP 1 -->
-      <div class="booking-step step-1">
-        <h4>Select Appointment</h4>
+     <div class="booking-step step-1">
+  <h4>Select Appointment</h4>
 
-        <div class="service-card">
-          <div>
-            <strong>Free Consultation</strong><br>
-            <small>30 minutes</small>
-          </div>
-          <button class="book-btn" data-service="Free Consultation">Book</button>
-        </div>
+  <div class="service-card">
+    <div>
+      <strong>Free Consultation</strong><br>
+      <small>30 minutes</small>
+    </div>
+    <button class="book-btn" data-service="Free Consultation">Book</button>
+  </div>
 
-        <div class="service-card">
-          <div>
-            <strong>Basic Service</strong><br>
-            <small>1 hour @ $99.00</small>
-          </div>
-          <button class="book-btn" data-service="Basic Service">Book</button>
-        </div>
+  <div class="service-card">
+    <div>
+      <strong>Basic Service</strong><br>
+      <small>1 hour @ $99.00</small>
+    </div>
+    <button class="book-btn" data-service="Basic Service">Book</button>
+  </div>
 
-        <div class="service-card">
-          <div>
-            <strong>Advanced Service</strong><br>
-            <small>1 hour @ $199.00</small>
-          </div>
-          <button class="book-btn" data-service="Advanced Service">Book</button>
-        </div>
-      </div>
+  <div class="service-card">
+    <div>
+      <strong>Advanced Service</strong><br>
+      <small>1 hour @ $199.00</small>
+    </div>
+    <button class="book-btn" data-service="Advanced Service">Book</button>
+  </div>
+</div>
 
-      <!-- STEP 2 -->
-      <div class="booking-step step-2" style="display:none;">
-        <button class="back-btn">←</button>
+<!-- STEP 2 -->
+<div class="booking-step step-2" style="display:none;">
+  <button class="back-btn">←</button>
 
-        <h4>Date & Time</h4>
-        <div class="service-summary">Service: <span id="serviceName">...</span></div>
+  <h4>Date & Time</h4>
+  <div class="service-summary">Service: <span id="serviceName">...</span></div>
 
-        <div class="week-nav">
-          <button class="week-arrow" id="prevWeek">←</button>
-          <div id="calendarWeek" class="week-days"></div>
-          <button class="week-arrow" id="nextWeek">→</button>
-        </div>
+  <div class="date-nav">
+    <button id="prevWeek">←</button>
+    <div id="weekDates" class="week-dates"></div>
+    <button id="nextWeek">→</button>
+  </div>
 
-        <div class="custom-date">
-        <label for="customDate">Pick another date:</label>
-        <input type="date" id="customDate">
-        </div>
+  <div class="custom-date">
+    <label for="customDate">Pick another date:</label>
+    <input type="date" id="customDate">
+  </div>
 
+  <div class="time-slots" id="timeSlots">
+    <p>Please select a date</p>
+  </div>
 
-        <div class="slots-list" id="timeSlots">
-          <p style="text-align:center;">Please select a date</p>
-        </div>
+  <form id="bookingForm">
+    <input type="hidden" name="service" id="selectedService">
+    <input type="hidden" name="date" id="selectedDate">
+    <input type="hidden" name="time" id="selectedTime">
 
-        <form id="bookingForm">
-        <input type="hidden" name="service" id="selectedService">
-        <input type="hidden" name="date" id="selectedDate">
-        <input type="hidden" name="time" id="selectedTime">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" name="name" required>
 
-        <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" required>
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" required>
 
-        <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" required>
+    <button type="submit">Confirm Booking</button>
+  </form>
+  <div id="bookingResult"></div>
+</div>
 
-        <button type="submit">Confirm Booking</button>
-        </form>
+<!-- STEP 3 (THANK YOU) -->
+<div class="booking-step step-3" style="display:none; text-align:center; padding:2rem;">
+  <img src="./imgs/logo-transparent-svg.svg" alt="A-1 Masonry" style="max-width: 150px; margin-bottom: 1rem;">
+  <h3>Thank you!</h3>
+  <p>Your appointment has been confirmed.<br>We will be in touch with you shortly.</p>
+  <button id="bookAnother" class="btn" style="margin-top:1.5rem;">Book Another Appointment</button>
+</div>
 
-        <div id="thankYouMessage" style="display:none; text-align:center; padding:2rem;">
-        <img src="./imgs/logo-transparent-svg.svg" alt="A-1 Masonry" style="max-width: 150px; margin-bottom: 1rem;">
-        <h3>Thank you!</h3>
-        <p>Your appointment has been confirmed.<br>We will be in touch with you shortly.</p>
-        </div>
-
-        <div id="bookingResult" style="color:red; text-align:center; margin-top:1rem;"></div>
-
-      </div>
     </div>
   </div>
 </section>
@@ -354,15 +354,28 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
     const result = await response.json();
 
-    // On success: hide form, show thank you
-    document.getElementById('bookingForm').style.display = 'none';
-    document.getElementById('thankYouMessage').style.display = 'block';
+    // On success: show Step 3 (Thank you), hide Steps 1 + 2
+    document.querySelector('.step-1').style.display = 'none';
+    document.querySelector('.step-2').style.display = 'none';
+    document.querySelector('.step-3').style.display = 'flex';
 
   } catch (error) {
     console.error('Error:', error);
     document.getElementById('bookingResult').innerText = 'Error submitting booking. Please try again later.';
   }
 });
+
+// Book Another button
+document.getElementById('bookAnother').addEventListener('click', function() {
+  // Reset steps
+  document.querySelector('.step-3').style.display = 'none';
+  document.querySelector('.step-1').style.display = 'flex';
+
+  // Reset form and week position
+  document.getElementById('bookingForm').reset();
+  currentWeekStart = new Date();
+});
+
 
 
 </script>
