@@ -129,11 +129,14 @@
       </div>
 
       <!-- STEP 3: SHOW CURRENT BOOKINGS -->
-      <div class="booking-step step-3" style="display:none;">
+
+        <div class="booking-step step-3" style="display:none;">
+        <button id="backToStep2" class="back-btn">←</button>
         <h4>Your Current Bookings</h4>
         <div id="currentBookings">Loading...</div>
         <button id="bookAnotherFrom3" class="btn" style="margin-top:1rem;">Book Another Appointment</button>
-      </div>
+        </div>
+
 
       <!-- STEP 4: PICK DATE + TIME -->
       <div class="booking-step step-4" style="display:none;">
@@ -445,11 +448,18 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   }
 });
 
+// Back from STEP 3 → STEP 2
+document.getElementById('backToStep2').addEventListener('click', function() {
+  document.querySelector('.step-3').style.display = 'none';
+  document.querySelector('.step-2').style.display = 'flex';
+});
+
 // Book Another from STEP 5 → go back to STEP 1
 document.getElementById('bookAnotherFrom5').addEventListener('click', function() {
   document.querySelector('.step-5').style.display = 'none';
   document.querySelector('.step-1').style.display = 'flex';
 });
+
 
 
 </script>
