@@ -426,6 +426,14 @@ nav .btn:hover {
   flex: 1;
 }
 
+.week-dates {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .day-card {
   flex: 1;
   border: 1px solid #ddd;
