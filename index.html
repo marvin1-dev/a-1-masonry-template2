@@ -145,20 +145,27 @@
         </div>
 
         <form id="bookingForm">
-          <input type="hidden" name="service" id="selectedService">
-          <input type="hidden" name="date" id="selectedDate">
-          <input type="hidden" name="time" id="selectedTime">
+        <input type="hidden" name="service" id="selectedService">
+        <input type="hidden" name="date" id="selectedDate">
+        <input type="hidden" name="time" id="selectedTime">
 
-          <label for="name">Full Name</label>
-          <input type="text" id="name" name="name" required>
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" required>
 
-          <label for="email">Email Address</label>
-          <input type="email" id="email" name="email" required>
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required>
 
-          <button type="submit" class="confirm-btn">Confirm Booking</button>
+        <button type="submit">Confirm Booking</button>
         </form>
 
-        <div id="bookingResult"></div>
+        <div id="thankYouMessage" style="display:none; text-align:center; padding:2rem;">
+        <img src="./imgs/logo-transparent-svg.svg" alt="A-1 Masonry" style="max-width: 150px; margin-bottom: 1rem;">
+        <h3>Thank you!</h3>
+        <p>Your appointment has been confirmed.<br>We will be in touch with you shortly.</p>
+        </div>
+
+        <div id="bookingResult" style="color:red; text-align:center; margin-top:1rem;"></div>
+
       </div>
     </div>
   </div>
@@ -346,12 +353,17 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     });
 
     const result = await response.json();
-    document.getElementById('bookingResult').innerText = result.message || 'Booking submitted!';
+
+    // On success: hide form, show thank you
+    document.getElementById('bookingForm').style.display = 'none';
+    document.getElementById('thankYouMessage').style.display = 'block';
+
   } catch (error) {
     console.error('Error:', error);
     document.getElementById('bookingResult').innerText = 'Error submitting booking. Please try again later.';
   }
 });
+
 
 </script>
 
