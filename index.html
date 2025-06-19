@@ -460,6 +460,11 @@ document.getElementById('bookAnotherFrom5').addEventListener('click', function()
   document.querySelector('.step-1').style.display = 'flex';
 });
 
+// Back from STEP 2 → STEP 1
+document.querySelector('.step-2 .back-btn').addEventListener('click', function() {
+  document.querySelector('.step-2').style.display = 'none';
+  document.querySelector('.step-1').style.display = 'flex';
+});
 
 
 </script>
