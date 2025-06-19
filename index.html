@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
 const BOOKING_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
-const LOOKUP_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book'; // Same endpoint for now
+const LOOKUP_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
 
 let currentWeekStart = new Date();
 
@@ -318,13 +318,23 @@ function renderWeek(availableDates) {
   });
 }
 
+function showStep(selector) {
+  document.querySelectorAll('.booking-step').forEach(step => {
+    step.classList.remove('active');
+    step.style.display = 'none';
+  });
+
+  const stepEl = document.querySelector(selector);
+  stepEl.style.display = 'flex';
+  setTimeout(() => stepEl.classList.add('active'), 50);
+}
+
 // STEP 1 → 2
 document.querySelectorAll('.book-btn').forEach(button => {
   button.addEventListener('click', function() {
     const service = this.getAttribute('data-service');
     document.getElementById('step2_service').value = service;
-    document.querySelector('.step-1').style.display = 'none';
-    document.querySelector('.step-2').style.display = 'flex';
+    showStep('.step-2');
   });
 });
 
@@ -336,10 +346,14 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
   const name = document.getElementById('step2_name').value;
   const email = document.getElementById('step2_email').value;
 
-  // Save name/email for step 4 form
+  // Save for step 4 form
   document.getElementById('selectedService').value = service;
   document.getElementById('selectedName').value = name;
   document.getElementById('selectedEmail').value = email;
+
+  const checkResult = document.getElementById('checkResult');
+  checkResult.innerText = 'Checking your bookings...';
+  checkResult.classList.add('loading');
 
   try {
     const response = await fetch(LOOKUP_API, {
@@ -354,11 +368,11 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
     });
 
     const result = await response.json();
+    checkResult.classList.remove('loading');
+    checkResult.innerText = '';
 
     if (result.bookings && result.bookings.length > 0) {
-      // Show STEP 3
-      document.querySelector('.step-2').style.display = 'none';
-      document.querySelector('.step-3').style.display = 'flex';
+      showStep('.step-3');
 
       const bookingsDiv = document.getElementById('currentBookings');
       bookingsDiv.innerHTML = '';
@@ -381,22 +395,20 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
       });
 
     } else {
-      // No bookings → STEP 4
-      document.querySelector('.step-2').style.display = 'none';
-      document.querySelector('.step-4').style.display = 'flex';
+      showStep('.step-4');
       loadStep4Dates(service);
     }
 
   } catch (error) {
     console.error('Lookup error:', error);
-    document.getElementById('checkResult').innerText = 'Error checking bookings. Please try again.';
+    checkResult.classList.remove('loading');
+    checkResult.innerText = 'Error checking bookings. Please try again.';
   }
 });
 
 // STEP 3 → Book another
 document.getElementById('bookAnotherFrom3').addEventListener('click', function() {
-  document.querySelector('.step-3').style.display = 'none';
-  document.querySelector('.step-4').style.display = 'flex';
+  showStep('.step-4');
   const service = document.getElementById('selectedService').value;
   loadStep4Dates(service);
 });
@@ -439,9 +451,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
     const result = await response.json();
 
-    // On success → STEP 5
-    document.querySelector('.step-4').style.display = 'none';
-    document.querySelector('.step-5').style.display = 'flex';
+    showStep('.step-5');
 
   } catch (error) {
     console.error('Booking error:', error);
@@ -451,23 +461,20 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
 // Back from STEP 3 → STEP 2
 document.getElementById('backToStep2').addEventListener('click', function() {
-  document.querySelector('.step-3').style.display = 'none';
-  document.querySelector('.step-2').style.display = 'flex';
+  showStep('.step-2');
 });
 
 // Book Another from STEP 5 → STEP 1
 document.getElementById('bookAnotherFrom5').addEventListener('click', function() {
-  document.querySelector('.step-5').style.display = 'none';
-  document.querySelector('.step-1').style.display = 'flex';
+  showStep('.step-1');
 });
 
 // Back from STEP 2 → STEP 1
 document.querySelector('.step-2 .back-btn').addEventListener('click', function() {
-  document.querySelector('.step-2').style.display = 'none';
-  document.querySelector('.step-1').style.display = 'flex';
+  showStep('.step-1');
 });
 
-}); // end DOMContentLoaded wrapper
+}); // end DOMContentLoaded
 
 
 </script>

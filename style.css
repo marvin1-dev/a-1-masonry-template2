@@ -411,6 +411,7 @@ nav .btn:hover {
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
+  
 }
 
 .booking-step h4 {
@@ -418,6 +419,36 @@ nav .btn:hover {
   font-weight: 600;
   text-align: center;
 }
+
+/* Smooth transitions for steps */
+.booking-step {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.booking-step.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Loading text style (for "Checking your bookings...") */
+#checkResult.loading {
+  font-size: 1rem;
+  color: #253551;
+  text-align: center;
+  margin-top: 1rem;
+  animation: pulse 1.2s infinite;
+}
+
+/* Simple pulse animation */
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+
 
 .service-summary {
   text-align: center;
