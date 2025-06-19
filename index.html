@@ -86,87 +86,95 @@
     <div class="column-left">
       <h3>Schedule your appointment</h3>
       <p>
-        Scheduling an appointment with our construction and maintenance team ensures that you receive expert guidance tailored to your project’s unique requirements.
+        Scheduling an appointment with our team ensures expert guidance tailored to your project’s needs.
       </p>
       <img src="https://picsum.photos/600/600?random=7" alt="Schedule Appointment">
     </div>
 
     <div class="column-right">
-      <!-- STEP 1 -->
-     <div class="booking-step step-1">
-  <h4>Select Appointment</h4>
 
-  <div class="service-card">
-    <div>
-      <strong>Free Consultation</strong><br>
-      <small>30 minutes</small>
-    </div>
-    <button class="book-btn" data-service="Free Consultation">Book</button>
-  </div>
+      <!-- STEP 1: SELECT SERVICE -->
+      <div class="booking-step step-1">
+        <h4>Select Service</h4>
+        <div class="service-card">
+          <div><strong>Free Consultation</strong><br><small>30 minutes</small></div>
+          <button class="book-btn" data-service="Free Consultation">Book</button>
+        </div>
+        <div class="service-card">
+          <div><strong>Basic Service</strong><br><small>1 hour @ $99.00</small></div>
+          <button class="book-btn" data-service="Basic Service">Book</button>
+        </div>
+        <div class="service-card">
+          <div><strong>Advanced Service</strong><br><small>1 hour @ $199.00</small></div>
+          <button class="book-btn" data-service="Advanced Service">Book</button>
+        </div>
+      </div>
 
-  <div class="service-card">
-    <div>
-      <strong>Basic Service</strong><br>
-      <small>1 hour @ $99.00</small>
-    </div>
-    <button class="book-btn" data-service="Basic Service">Book</button>
-  </div>
+      <!-- STEP 2: ENTER NAME + EMAIL -->
+      <div class="booking-step step-2" style="display:none;">
+        <button class="back-btn">←</button>
+        <h4>Enter Your Info</h4>
+        <form id="checkForm">
+          <input type="hidden" name="service" id="step2_service">
 
-  <div class="service-card">
-    <div>
-      <strong>Advanced Service</strong><br>
-      <small>1 hour @ $199.00</small>
-    </div>
-    <button class="book-btn" data-service="Advanced Service">Book</button>
-  </div>
-</div>
+          <label for="name">Full Name</label>
+          <input type="text" id="step2_name" name="name" required>
 
-<!-- STEP 2 -->
-<div class="booking-step step-2" style="display:none;">
-  <button class="back-btn">←</button>
+          <label for="email">Email Address</label>
+          <input type="email" id="step2_email" name="email" required>
 
-  <h4>Date & Time</h4>
-  <div class="service-summary">Service: <span id="serviceName">...</span></div>
+          <button type="submit">Continue</button>
+        </form>
+        <div id="checkResult"></div>
+      </div>
 
-  <div class="date-nav">
-    <button id="prevWeek">←</button>
-    <div id="calendarWeek" class="week-dates"></div>
+      <!-- STEP 3: SHOW CURRENT BOOKINGS -->
+      <div class="booking-step step-3" style="display:none;">
+        <h4>Your Current Bookings</h4>
+        <div id="currentBookings">Loading...</div>
+        <button id="bookAnotherFrom3" class="btn" style="margin-top:1rem;">Book Another Appointment</button>
+      </div>
 
-    <button id="nextWeek">→</button>
-  </div>
+      <!-- STEP 4: PICK DATE + TIME -->
+      <div class="booking-step step-4" style="display:none;">
+        <button class="back-btn">←</button>
+        <h4>Date & Time</h4>
+        <div class="service-summary">Service: <span id="step4_service">...</span></div>
 
-  <div class="custom-date">
-    <label for="customDate">Pick another date:</label>
-    <input type="date" id="customDate">
-  </div>
+        <div class="date-nav">
+          <button id="prevWeek">←</button>
+          <div id="calendarWeek" class="week-dates"></div>
+          <button id="nextWeek">→</button>
+        </div>
 
-  <div class="time-slots" id="timeSlots">
-    <p>Please select a date</p>
-  </div>
+        <div class="custom-date">
+          <label for="customDate">Pick another date:</label>
+          <input type="date" id="customDate">
+        </div>
 
-  <form id="bookingForm">
-    <input type="hidden" name="service" id="selectedService">
-    <input type="hidden" name="date" id="selectedDate">
-    <input type="hidden" name="time" id="selectedTime">
+        <div class="time-slots" id="timeSlots">
+          <p>Please select a date</p>
+        </div>
 
-    <label for="name">Full Name</label>
-    <input type="text" id="name" name="name" required>
+        <form id="bookingForm">
+          <input type="hidden" name="service" id="selectedService">
+          <input type="hidden" name="date" id="selectedDate">
+          <input type="hidden" name="time" id="selectedTime">
+          <input type="hidden" name="name" id="selectedName">
+          <input type="hidden" name="email" id="selectedEmail">
 
-    <label for="email">Email Address</label>
-    <input type="email" id="email" name="email" required>
+          <button type="submit">Confirm Booking</button>
+        </form>
+        <div id="bookingResult"></div>
+      </div>
 
-    <button type="submit">Confirm Booking</button>
-  </form>
-  <div id="bookingResult"></div>
-</div>
-
-<!-- STEP 3 (THANK YOU) -->
-<div class="booking-step step-3" style="display:none; text-align:center; padding:2rem;">
-  <img src="./imgs/logo-transparent-svg.svg" alt="A-1 Masonry" style="max-width: 150px; margin-bottom: 1rem;">
-  <h3>Thank you!</h3>
-  <p>Your appointment has been confirmed.<br>We will be in touch with you shortly.</p>
-  <button id="bookAnother" class="btn" style="margin-top:1.5rem;">Book Another Appointment</button>
-</div>
+      <!-- STEP 5: THANK YOU -->
+      <div class="booking-step step-5" style="display:none; text-align:center;">
+        <img src="./imgs/logo-transparent-svg.svg" alt="A-1 Masonry" style="max-width:150px; margin-bottom:1rem;">
+        <h3>Thank you!</h3>
+        <p>Your appointment has been confirmed.<br>We will be in touch with you shortly.</p>
+        <button id="bookAnotherFrom5" class="btn" style="margin-top:1.5rem;">Book Another Appointment</button>
+      </div>
 
     </div>
   </div>
@@ -231,6 +239,7 @@
 <script>
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
 const BOOKING_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
+const LOOKUP_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book'; // Same endpoint for now
 
 let currentWeekStart = new Date();
 
@@ -304,42 +313,103 @@ function renderWeek(availableDates) {
   });
 }
 
+// STEP 1 → 2
 document.querySelectorAll('.book-btn').forEach(button => {
-  button.addEventListener('click', async function() {
+  button.addEventListener('click', function() {
     const service = this.getAttribute('data-service');
-    document.getElementById('selectedService').value = service;
-    document.getElementById('serviceName').textContent = service;
-
+    document.getElementById('step2_service').value = service;
     document.querySelector('.step-1').style.display = 'none';
     document.querySelector('.step-2').style.display = 'flex';
-
-    currentWeekStart = new Date(); // Reset week to today
-    const availableDates = await loadAvailableDates(service);
-    renderWeek(availableDates);
-
-    document.getElementById('prevWeek').onclick = () => {
-      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-      renderWeek(availableDates);
-    };
-
-    document.getElementById('nextWeek').onclick = () => {
-      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-      renderWeek(availableDates);
-    };
-
-    document.getElementById('customDate').onchange = function() {
-      document.getElementById('selectedDate').value = this.value;
-      document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
-      document.getElementById('timeSlots').innerHTML = '<p style="text-align:center;">Select a time</p>';
-    };
   });
 });
 
-document.querySelector('.back-btn').addEventListener('click', function() {
-  document.querySelector('.step-2').style.display = 'none';
-  document.querySelector('.step-1').style.display = 'flex';
+// STEP 2 submit → check bookings (STEP 3 or 4)
+document.getElementById('checkForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const service = document.getElementById('step2_service').value;
+  const name = document.getElementById('step2_name').value;
+  const email = document.getElementById('step2_email').value;
+
+  // Save name/email for step 4 form
+  document.getElementById('selectedService').value = service;
+  document.getElementById('selectedName').value = name;
+  document.getElementById('selectedEmail').value = email;
+
+  try {
+    const response = await fetch(LOOKUP_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'lookup',
+        service,
+        name,
+        email
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.bookings && result.bookings.length > 0) {
+      // Show STEP 3
+      document.querySelector('.step-2').style.display = 'none';
+      document.querySelector('.step-3').style.display = 'flex';
+
+      const bookingsDiv = document.getElementById('currentBookings');
+      bookingsDiv.innerHTML = '';
+      result.bookings.forEach(b => {
+        const item = document.createElement('div');
+        item.style.marginBottom = '10px';
+        item.innerHTML = `
+          <strong>${b.service}</strong><br>
+          ${b.date} at ${b.time}<br>
+        `;
+        bookingsDiv.appendChild(item);
+      });
+    } else {
+      // No bookings → STEP 4
+      document.querySelector('.step-2').style.display = 'none';
+      document.querySelector('.step-4').style.display = 'flex';
+      loadStep4Dates(service);
+    }
+
+  } catch (error) {
+    console.error('Lookup error:', error);
+    document.getElementById('checkResult').innerText = 'Error checking bookings. Please try again.';
+  }
 });
 
+// STEP 3 → Book another
+document.getElementById('bookAnotherFrom3').addEventListener('click', function() {
+  document.querySelector('.step-3').style.display = 'none';
+  document.querySelector('.step-4').style.display = 'flex';
+  const service = document.getElementById('selectedService').value;
+  loadStep4Dates(service);
+});
+
+function loadStep4Dates(service) {
+  document.getElementById('step4_service').textContent = service;
+  currentWeekStart = new Date();
+  loadAvailableDates(service).then(renderWeek);
+
+  document.getElementById('prevWeek').onclick = () => {
+    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    loadAvailableDates(service).then(renderWeek);
+  };
+
+  document.getElementById('nextWeek').onclick = () => {
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    loadAvailableDates(service).then(renderWeek);
+  };
+
+  document.getElementById('customDate').onchange = function() {
+    document.getElementById('selectedDate').value = this.value;
+    document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
+    document.getElementById('timeSlots').innerHTML = '<p style="text-align:center;">Select a time</p>';
+  };
+}
+
+// STEP 4 → Confirm Booking → STEP 5
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
@@ -355,28 +425,21 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 
     const result = await response.json();
 
-    // On success: show Step 3 (Thank you), hide Steps 1 + 2
-    document.querySelector('.step-1').style.display = 'none';
-    document.querySelector('.step-2').style.display = 'none';
-    document.querySelector('.step-3').style.display = 'flex';
+    // On success → STEP 5
+    document.querySelector('.step-4').style.display = 'none';
+    document.querySelector('.step-5').style.display = 'flex';
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Booking error:', error);
     document.getElementById('bookingResult').innerText = 'Error submitting booking. Please try again later.';
   }
 });
 
-// Book Another button
-document.getElementById('bookAnother').addEventListener('click', function() {
-  // Reset steps
-  document.querySelector('.step-3').style.display = 'none';
+// Book Another from STEP 5 → go back to STEP 1
+document.getElementById('bookAnotherFrom5').addEventListener('click', function() {
+  document.querySelector('.step-5').style.display = 'none';
   document.querySelector('.step-1').style.display = 'flex';
-
-  // Reset form and week position
-  document.getElementById('bookingForm').reset();
-  currentWeekStart = new Date();
 });
-
 
 
 </script>
