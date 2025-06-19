@@ -240,6 +240,8 @@
 </footer>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
 const BOOKING_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
 const LOOKUP_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book'; // Same endpoint for now
@@ -360,25 +362,24 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
 
       const bookingsDiv = document.getElementById('currentBookings');
       bookingsDiv.innerHTML = '';
-        result.bookings.forEach(b => {
+      result.bookings.forEach(b => {
         const item = document.createElement('div');
         item.className = 'booking-card';
 
         const formattedDate = new Date(b.date).toLocaleDateString('en-US', {
-            month: '2-digit',
-            day: '2-digit',
-            year: 'numeric'
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric'
         });
 
         item.innerHTML = `
-            <h5>${b.service}</h5>
-            <p>${formattedDate} at ${b.time}</p>
+          <h5>${b.service}</h5>
+          <p>${formattedDate} at ${b.time}</p>
         `;
 
         bookingsDiv.appendChild(item);
-        });
+      });
 
-      
     } else {
       // No bookings → STEP 4
       document.querySelector('.step-2').style.display = 'none';
@@ -454,7 +455,7 @@ document.getElementById('backToStep2').addEventListener('click', function() {
   document.querySelector('.step-2').style.display = 'flex';
 });
 
-// Book Another from STEP 5 → go back to STEP 1
+// Book Another from STEP 5 → STEP 1
 document.getElementById('bookAnotherFrom5').addEventListener('click', function() {
   document.querySelector('.step-5').style.display = 'none';
   document.querySelector('.step-1').style.display = 'flex';
@@ -465,6 +466,8 @@ document.querySelector('.step-2 .back-btn').addEventListener('click', function()
   document.querySelector('.step-2').style.display = 'none';
   document.querySelector('.step-1').style.display = 'flex';
 });
+
+}); // end DOMContentLoaded wrapper
 
 
 </script>
