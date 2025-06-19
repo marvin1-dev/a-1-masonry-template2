@@ -425,13 +425,31 @@ nav .btn:hover {
   gap: 0.5rem;
   flex: 1;
 }
+.date-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.date-nav button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.date-nav button:hover {
+  color: #000;
+}
 
 .week-dates {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-top: 1rem;
+  flex: 1;
 }
 
 .day-card {
@@ -441,7 +459,6 @@ nav .btn:hover {
   padding: 0.8rem;
   text-align: center;
   cursor: pointer;
-  font-size: 0.9rem;
 }
 
 .day-card.selected {
@@ -453,6 +470,7 @@ nav .btn:hover {
 .day-card:hover {
   background: #f0f0f0;
 }
+
 
 .custom-date {
   margin-top: 1rem;
