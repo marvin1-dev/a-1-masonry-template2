@@ -86,19 +86,18 @@
     <div class="column-left">
       <h3>Schedule your appointment</h3>
       <p>
-        Scheduling an appointment with our construction and maintenance team ensures that you receive expert guidance tailored to your project’s unique requirements. Our dedicated professionals are ready to provide efficient and reliable services to meet all your needs.
+        Scheduling an appointment with our construction and maintenance team ensures that you receive expert guidance tailored to your project’s unique requirements.
       </p>
       <img src="https://picsum.photos/600/600?random=7" alt="Schedule Appointment">
     </div>
 
     <div class="column-right">
-
       <!-- STEP 1 -->
       <div class="booking-step step-1">
-        <h4><i class="fa fa-calendar"></i> Select Appointment</h4>
+        <h4>Select Appointment</h4>
 
         <div class="service-card">
-          <div class="service-info">
+          <div>
             <strong>Free Consultation</strong><br>
             <small>30 minutes</small>
           </div>
@@ -106,7 +105,7 @@
         </div>
 
         <div class="service-card">
-          <div class="service-info">
+          <div>
             <strong>Basic Service</strong><br>
             <small>1 hour @ $99.00</small>
           </div>
@@ -114,20 +113,41 @@
         </div>
 
         <div class="service-card">
-          <div class="service-info">
+          <div>
             <strong>Advanced Service</strong><br>
             <small>1 hour @ $199.00</small>
           </div>
           <button class="book-btn" data-service="Advanced Service">Book</button>
         </div>
-
       </div>
 
       <!-- STEP 2 -->
       <div class="booking-step step-2" style="display:none;">
+        <button class="back-btn">←</button>
+
         <h4>Date & Time</h4>
+        <div class="service-summary">Service: <span id="serviceName">...</span></div>
+
+        <div class="week-nav">
+          <button class="week-arrow" id="prevWeek">←</button>
+          <div id="calendarWeek" class="week-days"></div>
+          <button class="week-arrow" id="nextWeek">→</button>
+        </div>
+
+        <div class="custom-date">
+        <label for="customDate">Pick another date:</label>
+        <input type="date" id="customDate">
+        </div>
+
+
+        <div class="slots-list" id="timeSlots">
+          <p style="text-align:center;">Please select a date</p>
+        </div>
+
         <form id="bookingForm">
           <input type="hidden" name="service" id="selectedService">
+          <input type="hidden" name="date" id="selectedDate">
+          <input type="hidden" name="time" id="selectedTime">
 
           <label for="name">Full Name</label>
           <input type="text" id="name" name="name" required>
@@ -135,22 +155,17 @@
           <label for="email">Email Address</label>
           <input type="email" id="email" name="email" required>
 
-          <label for="date">Select Date</label>
-          <div id="date-buttons" class="date-buttons">Loading dates...</div>
-
-          <label for="time">Select Time</label>
-          <div id="time-buttons" class="time-buttons">Please select a date</div>
-
-          <button type="submit">Confirm Booking</button>
+          <button type="submit" class="confirm-btn">Confirm Booking</button>
         </form>
 
-        <div id="bookingResult" class="booking-result"></div>
-        <button class="back-btn">Back</button>
+        <div id="bookingResult"></div>
       </div>
-
     </div>
   </div>
 </section>
+
+
+
 
 
 <section class="section two-column" id="about">
@@ -209,82 +224,113 @@
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
 const BOOKING_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
 
+let currentWeekStart = new Date();
+
+function formatDate(dateObj) {
+  return dateObj.toISOString().split('T')[0];
+}
+
+function getWeekDates(start) {
+  const week = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    week.push(d);
+  }
+  return week;
+}
+
+async function loadAvailableDates(service) {
+  try {
+    const response = await fetch(`${AVAILABLE_API}?service=${encodeURIComponent(service)}`);
+    const data = await response.json();
+    return data.available_dates || [];
+  } catch (err) {
+    console.error('Failed to load dates:', err);
+    return [];
+  }
+}
+
+function renderWeek(availableDates) {
+  const week = getWeekDates(currentWeekStart);
+  const calendarWeek = document.getElementById('calendarWeek');
+  calendarWeek.innerHTML = '';
+
+  week.forEach(dateObj => {
+    const dateStr = formatDate(dateObj);
+    const slots = availableDates.find(d => d.date === dateStr)?.slots || [];
+
+    const dayCard = document.createElement('div');
+    dayCard.className = 'day-card';
+    dayCard.innerHTML = `
+      <div>${dateObj.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+      <div>${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+    `;
+
+    dayCard.addEventListener('click', () => {
+      document.getElementById('selectedDate').value = dateStr;
+      document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
+      dayCard.classList.add('selected');
+
+      const timeSlots = document.getElementById('timeSlots');
+      timeSlots.innerHTML = '';
+
+      if (slots.length > 0) {
+        slots.forEach(time => {
+          const btn = document.createElement('button');
+          btn.className = 'slot';
+          btn.textContent = time;
+          btn.addEventListener('click', () => {
+            document.getElementById('selectedTime').value = time;
+            document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+          });
+          timeSlots.appendChild(btn);
+        });
+      } else {
+        timeSlots.innerHTML = '<p style="text-align:center;">No appointments available</p>';
+      }
+    });
+
+    calendarWeek.appendChild(dayCard);
+  });
+}
+
 document.querySelectorAll('.book-btn').forEach(button => {
   button.addEventListener('click', async function() {
     const service = this.getAttribute('data-service');
     document.getElementById('selectedService').value = service;
+    document.getElementById('serviceName').textContent = service;
+
     document.querySelector('.step-1').style.display = 'none';
     document.querySelector('.step-2').style.display = 'flex';
 
-    // Load available dates
-    const dateContainer = document.getElementById('date-buttons');
-    const timeContainer = document.getElementById('time-buttons');
-    dateContainer.innerHTML = 'Loading dates...';
-    timeContainer.innerHTML = 'Please select a date';
+    currentWeekStart = new Date(); // Reset week to today
+    const availableDates = await loadAvailableDates(service);
+    renderWeek(availableDates);
 
-    try {
-      const response = await fetch(`${AVAILABLE_API}?service=${encodeURIComponent(service)}`);
-      const data = await response.json();
+    document.getElementById('prevWeek').onclick = () => {
+      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+      renderWeek(availableDates);
+    };
 
-      if (data.available_dates && data.available_dates.length > 0) {
-        dateContainer.innerHTML = '';
-        data.available_dates.forEach(item => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.textContent = item.date;
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('#date-buttons button').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            document.getElementById('date').value = item.date;
-            loadTimeButtons(item.slots);
-          });
-          dateContainer.appendChild(btn);
-        });
-      } else {
-        dateContainer.innerHTML = '<p>No available dates</p>';
-        timeContainer.innerHTML = '<p>No available times</p>';
-      }
-    } catch (err) {
-      console.error('Failed to load dates:', err);
-      dateContainer.innerHTML = '<p>Error loading dates</p>';
-      timeContainer.innerHTML = '<p>Error loading times</p>';
-    }
+    document.getElementById('nextWeek').onclick = () => {
+      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+      renderWeek(availableDates);
+    };
+
+    document.getElementById('customDate').onchange = function() {
+      document.getElementById('selectedDate').value = this.value;
+      document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
+      document.getElementById('timeSlots').innerHTML = '<p style="text-align:center;">Select a time</p>';
+    };
   });
 });
-
-function loadTimeButtons(slots) {
-  const timeContainer = document.getElementById('time-buttons');
-  timeContainer.innerHTML = '';
-  slots.forEach(slot => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = slot;
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#time-buttons button').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      document.getElementById('time').value = slot;
-    });
-    timeContainer.appendChild(btn);
-  });
-}
 
 document.querySelector('.back-btn').addEventListener('click', function() {
   document.querySelector('.step-2').style.display = 'none';
   document.querySelector('.step-1').style.display = 'flex';
 });
-
-// Hidden fields to hold selected date/time
-const hiddenDate = document.createElement('input');
-hiddenDate.type = 'hidden';
-hiddenDate.name = 'date';
-hiddenDate.id = 'date';
-document.getElementById('bookingForm').appendChild(hiddenDate);
-
-const hiddenTime = document.createElement('input');
-hiddenTime.type = 'hidden';
-hiddenTime.name = 'time';
-hiddenTime.id = 'time';
-document.getElementById('bookingForm').appendChild(hiddenTime);
 
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
   e.preventDefault();
