@@ -402,6 +402,9 @@ nav .btn:hover {
 }
 
 
+
+
+/* Smooth transitions for steps */
 .booking-step {
   background: #fff;
   padding: 2rem;
@@ -411,7 +414,6 @@ nav .btn:hover {
   flex-direction: column;
   gap: 1.5rem;
   width: 100%;
-  
 }
 
 .booking-step h4 {
@@ -422,7 +424,6 @@ nav .btn:hover {
 
 /* Smooth transitions for steps */
 .booking-step {
-  opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -431,6 +432,7 @@ nav .btn:hover {
   opacity: 1;
   transform: translateY(0);
 }
+
 
 /* Loading text style (for "Checking your bookings...") */
 #checkResult.loading {
