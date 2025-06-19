@@ -357,15 +357,25 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
 
       const bookingsDiv = document.getElementById('currentBookings');
       bookingsDiv.innerHTML = '';
-      result.bookings.forEach(b => {
+        result.bookings.forEach(b => {
         const item = document.createElement('div');
-        item.style.marginBottom = '10px';
+        item.className = 'booking-card';
+
+        const formattedDate = new Date(b.date).toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric'
+        });
+
         item.innerHTML = `
-          <strong>${b.service}</strong><br>
-          ${b.date} at ${b.time}<br>
+            <h5>${b.service}</h5>
+            <p>${formattedDate} at ${b.time}</p>
         `;
+
         bookingsDiv.appendChild(item);
-      });
+        });
+
+      
     } else {
       // No bookings → STEP 4
       document.querySelector('.step-2').style.display = 'none';

@@ -376,6 +376,32 @@ nav .btn:hover {
 
 /* --- BOOKING PANEL STYLES --- */
 
+.booking-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.booking-card:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+}
+
+.booking-card h5 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #253551;
+}
+
+.booking-card p {
+  margin: 0;
+  color: #555;
+}
+
+
 .booking-step {
   background: #fff;
   padding: 2rem;
