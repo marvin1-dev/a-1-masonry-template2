@@ -399,3 +399,41 @@ footer {
     max-width: 100%;
   }
 }
+
+/* --- Updated Booking Step 2 --- */
+.date-buttons,
+.time-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.date-buttons button,
+.time-buttons button {
+  background: #fff;
+  border: 1px solid #253551;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.date-buttons button:hover,
+.time-buttons button:hover {
+  background: #253551;
+  color: #fff;
+}
+
+.date-buttons button.selected,
+.time-buttons button.selected {
+  background: #253551;
+  color: #fff;
+}
+
+.booking-result {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: green;
+}
+

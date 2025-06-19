@@ -90,12 +90,15 @@
       </p>
       <img src="https://picsum.photos/600/600?random=7" alt="Schedule Appointment">
     </div>
+
     <div class="column-right">
+
+      <!-- STEP 1 -->
       <div class="booking-step step-1">
-        <h4>Select Appointment</h4>
+        <h4><i class="fa fa-calendar"></i> Select Appointment</h4>
 
         <div class="service-card">
-          <div>
+          <div class="service-info">
             <strong>Free Consultation</strong><br>
             <small>30 minutes</small>
           </div>
@@ -103,7 +106,7 @@
         </div>
 
         <div class="service-card">
-          <div>
+          <div class="service-info">
             <strong>Basic Service</strong><br>
             <small>1 hour @ $99.00</small>
           </div>
@@ -111,16 +114,18 @@
         </div>
 
         <div class="service-card">
-          <div>
+          <div class="service-info">
             <strong>Advanced Service</strong><br>
             <small>1 hour @ $199.00</small>
           </div>
           <button class="book-btn" data-service="Advanced Service">Book</button>
         </div>
+
       </div>
 
+      <!-- STEP 2 -->
       <div class="booking-step step-2" style="display:none;">
-        <h4>Confirm Appointment</h4>
+        <h4>Date & Time</h4>
         <form id="bookingForm">
           <input type="hidden" name="service" id="selectedService">
 
@@ -130,24 +135,23 @@
           <label for="email">Email Address</label>
           <input type="email" id="email" name="email" required>
 
-          <label for="date">Preferred Date</label>
-          <select id="date" name="date" required>
-            <option value="">Loading dates...</option>
-          </select>
+          <label for="date">Select Date</label>
+          <div id="date-buttons" class="date-buttons">Loading dates...</div>
 
-          <label for="time">Preferred Time</label>
-          <select id="time" name="time" required>
-            <option value="">Please select date first</option>
-          </select>
+          <label for="time">Select Time</label>
+          <div id="time-buttons" class="time-buttons">Please select a date</div>
 
           <button type="submit">Confirm Booking</button>
         </form>
-        <div id="bookingResult"></div>
+
+        <div id="bookingResult" class="booking-result"></div>
         <button class="back-btn">Back</button>
       </div>
+
     </div>
   </div>
 </section>
+
 
 <section class="section two-column" id="about">
   <div class="container">
@@ -213,52 +217,74 @@ document.querySelectorAll('.book-btn').forEach(button => {
     document.querySelector('.step-2').style.display = 'flex';
 
     // Load available dates
-    const dateSelect = document.getElementById('date');
-    const timeSelect = document.getElementById('time');
-    dateSelect.innerHTML = '<option value="">Loading dates...</option>';
-    timeSelect.innerHTML = '<option value="">Please select date first</option>';
+    const dateContainer = document.getElementById('date-buttons');
+    const timeContainer = document.getElementById('time-buttons');
+    dateContainer.innerHTML = 'Loading dates...';
+    timeContainer.innerHTML = 'Please select a date';
 
     try {
       const response = await fetch(`${AVAILABLE_API}?service=${encodeURIComponent(service)}`);
       const data = await response.json();
 
       if (data.available_dates && data.available_dates.length > 0) {
-        dateSelect.innerHTML = '<option value="">Select date</option>';
+        dateContainer.innerHTML = '';
         data.available_dates.forEach(item => {
-          const opt = document.createElement('option');
-          opt.value = item.date;
-          opt.textContent = item.date;
-          dateSelect.appendChild(opt);
-        });
-
-        dateSelect.addEventListener('change', function() {
-          const selected = data.available_dates.find(d => d.date === this.value);
-          timeSelect.innerHTML = '<option value="">Select time</option>';
-          if (selected && selected.slots) {
-            selected.slots.forEach(slot => {
-              const opt = document.createElement('option');
-              opt.value = slot;
-              opt.textContent = slot;
-              timeSelect.appendChild(opt);
-            });
-          }
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = item.date;
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('#date-buttons button').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('date').value = item.date;
+            loadTimeButtons(item.slots);
+          });
+          dateContainer.appendChild(btn);
         });
       } else {
-        dateSelect.innerHTML = '<option value="">No available dates</option>';
-        timeSelect.innerHTML = '<option value="">No available times</option>';
+        dateContainer.innerHTML = '<p>No available dates</p>';
+        timeContainer.innerHTML = '<p>No available times</p>';
       }
     } catch (err) {
       console.error('Failed to load dates:', err);
-      dateSelect.innerHTML = '<option value="">Error loading dates</option>';
-      timeSelect.innerHTML = '<option value="">Error loading times</option>';
+      dateContainer.innerHTML = '<p>Error loading dates</p>';
+      timeContainer.innerHTML = '<p>Error loading times</p>';
     }
   });
 });
+
+function loadTimeButtons(slots) {
+  const timeContainer = document.getElementById('time-buttons');
+  timeContainer.innerHTML = '';
+  slots.forEach(slot => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = slot;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#time-buttons button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('time').value = slot;
+    });
+    timeContainer.appendChild(btn);
+  });
+}
 
 document.querySelector('.back-btn').addEventListener('click', function() {
   document.querySelector('.step-2').style.display = 'none';
   document.querySelector('.step-1').style.display = 'flex';
 });
+
+// Hidden fields to hold selected date/time
+const hiddenDate = document.createElement('input');
+hiddenDate.type = 'hidden';
+hiddenDate.name = 'date';
+hiddenDate.id = 'date';
+document.getElementById('bookingForm').appendChild(hiddenDate);
+
+const hiddenTime = document.createElement('input');
+hiddenTime.type = 'hidden';
+hiddenTime.name = 'time';
+hiddenTime.id = 'time';
+document.getElementById('bookingForm').appendChild(hiddenTime);
 
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -280,6 +306,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     document.getElementById('bookingResult').innerText = 'Error submitting booking. Please try again later.';
   }
 });
+
 </script>
 
 </body>
