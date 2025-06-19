@@ -159,9 +159,9 @@ nav .btn:hover {
 /* --- BOOK SECTION --- */
 #book .container.two-column {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4rem;
-  align-items: flex-start;
+  align-items: center;
 }
 
 #book .column-left {
@@ -192,8 +192,10 @@ nav .btn:hover {
 #book .column-right {
   flex: 1 1 50%;
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 2rem;
 }
+
 
 /* STEP 1 + STEP 2 WRAPPERS */
 .booking-step {
@@ -204,6 +206,7 @@ nav .btn:hover {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
 }
 
 .booking-step h4 {

@@ -131,10 +131,14 @@
           <input type="email" id="email" name="email" required>
 
           <label for="date">Preferred Date</label>
-          <input type="date" id="date" name="date" required>
+          <select id="date" name="date" required>
+            <option value="">Loading dates...</option>
+          </select>
 
           <label for="time">Preferred Time</label>
-          <input type="time" id="time" name="time" required>
+          <select id="time" name="time" required>
+            <option value="">Please select date first</option>
+          </select>
 
           <button type="submit">Confirm Booking</button>
         </form>
@@ -196,13 +200,58 @@
     </div>
   </div>
 </footer>
+
 <script>
+const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
+const BOOKING_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
+
 document.querySelectorAll('.book-btn').forEach(button => {
-  button.addEventListener('click', function() {
+  button.addEventListener('click', async function() {
     const service = this.getAttribute('data-service');
     document.getElementById('selectedService').value = service;
     document.querySelector('.step-1').style.display = 'none';
     document.querySelector('.step-2').style.display = 'flex';
+
+    // Load available dates
+    const dateSelect = document.getElementById('date');
+    const timeSelect = document.getElementById('time');
+    dateSelect.innerHTML = '<option value="">Loading dates...</option>';
+    timeSelect.innerHTML = '<option value="">Please select date first</option>';
+
+    try {
+      const response = await fetch(`${AVAILABLE_API}?service=${encodeURIComponent(service)}`);
+      const data = await response.json();
+
+      if (data.available_dates && data.available_dates.length > 0) {
+        dateSelect.innerHTML = '<option value="">Select date</option>';
+        data.available_dates.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.date;
+          opt.textContent = item.date;
+          dateSelect.appendChild(opt);
+        });
+
+        dateSelect.addEventListener('change', function() {
+          const selected = data.available_dates.find(d => d.date === this.value);
+          timeSelect.innerHTML = '<option value="">Select time</option>';
+          if (selected && selected.slots) {
+            selected.slots.forEach(slot => {
+              const opt = document.createElement('option');
+              opt.value = slot;
+              opt.textContent = slot;
+              timeSelect.appendChild(opt);
+            });
+          }
+        });
+      } else {
+        dateSelect.innerHTML = '<option value="">No available dates</option>';
+        timeSelect.innerHTML = '<option value="">No available times</option>';
+      }
+    } catch (err) {
+      console.error('Failed to load dates:', err);
+      dateSelect.innerHTML = '<option value="">Error loading dates</option>';
+      timeSelect.innerHTML = '<option value="">Error loading times</option>';
+    }
   });
 });
 
@@ -218,7 +267,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   const data = Object.fromEntries(formData);
 
   try {
-    const response = await fetch('https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book', {
+    const response = await fetch(BOOKING_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
