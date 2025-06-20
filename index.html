@@ -150,6 +150,10 @@
             <p>Loading available dates...</p>
         </div>
 
+        <!-- Add this toggle below the spinner: -->
+        <a href="#" id="toggleCustomDate" style="text-align:center; display:block; margin:1rem auto; font-weight:600; color:#253551; cursor:pointer;">Or choose a custom date</a>
+
+        <!-- Then your service-summary and rest -->
         <div class="service-summary">Service: <span id="step4_service">...</span></div>
 
         <div class="date-nav">
@@ -257,6 +261,7 @@ const BOOKING_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/defa
 const LOOKUP_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
 
 let currentWeekStart = new Date();
+let availableDatesGlobal = []; // Store loaded dates for custom date toggle
 
 function formatDate(dateObj) {
   return dateObj.toISOString().split('T')[0];
@@ -276,9 +281,11 @@ async function loadAvailableDates(service) {
   try {
     const response = await fetch(`${AVAILABLE_API}?service=${encodeURIComponent(service)}`);
     const data = await response.json();
-    return data.available_dates || [];
+    availableDatesGlobal = data.available_dates || [];
+    return availableDatesGlobal;
   } catch (err) {
     console.error('Failed to load dates:', err);
+    availableDatesGlobal = [];
     return [];
   }
 }
@@ -304,30 +311,32 @@ function renderWeek(availableDates) {
       document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
       dayCard.classList.add('selected');
 
-      document.querySelector('.custom-date').style.display = 'none'; // Hide custom date
-
-      const timeSlots = document.getElementById('timeSlots');
-      timeSlots.innerHTML = '';
-
-      if (slots.length > 0) {
-        slots.forEach(time => {
-          const btn = document.createElement('button');
-          btn.className = 'slot';
-          btn.textContent = time;
-          btn.addEventListener('click', () => {
-            document.getElementById('selectedTime').value = time;
-            document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-          });
-          timeSlots.appendChild(btn);
-        });
-      } else {
-        timeSlots.innerHTML = '<p style="text-align:center;">No appointments available</p>';
-      }
+      renderTimeSlots(slots);
     });
 
     calendarWeek.appendChild(dayCard);
   });
+}
+
+function renderTimeSlots(slots) {
+  const timeSlots = document.getElementById('timeSlots');
+  timeSlots.innerHTML = '';
+
+  if (slots.length > 0) {
+    slots.forEach(time => {
+      const btn = document.createElement('button');
+      btn.className = 'slot';
+      btn.textContent = time;
+      btn.addEventListener('click', () => {
+        document.getElementById('selectedTime').value = time;
+        document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+      timeSlots.appendChild(btn);
+    });
+  } else {
+    timeSlots.innerHTML = '<p style="text-align:center;">No appointments available</p>';
+  }
 }
 
 function showStep(stepClass) {
@@ -425,8 +434,6 @@ function loadStep4Dates(service) {
   document.getElementById('calendarWeek').innerHTML = '';
   document.getElementById('timeSlots').innerHTML = '<p>Please select a date</p>';
 
-  document.querySelector('.custom-date').style.display = 'block'; // Always show custom date when loading
-
   loadAvailableDates(service).then(availableDates => {
     renderWeek(availableDates);
     loadingSpinner.style.display = 'none';
@@ -450,34 +457,32 @@ function loadStep4Dates(service) {
     });
   };
 
-  document.getElementById('customDate').onchange = async function() {
-    const customDate = this.value;
-    document.getElementById('selectedDate').value = customDate;
-
+  document.getElementById('customDate').onchange = function() {
+    document.getElementById('selectedDate').value = this.value;
     document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
 
-    const currentService = document.getElementById('selectedService').value || document.getElementById('step4_service').textContent;
+    const slots = availableDatesGlobal.find(d => d.date === this.value)?.slots || [];
+    renderTimeSlots(slots);
+  };
 
-    const availableDates = await loadAvailableDates(currentService);
-    const dayData = availableDates.find(d => d.date === customDate);
+  // Toggle link logic
+  const toggleLink = document.getElementById('toggleCustomDate');
+  const calendarSection = document.querySelector('.date-nav');
+  const customDateSection = document.querySelector('.custom-date');
 
-    const timeSlots = document.getElementById('timeSlots');
-    timeSlots.innerHTML = '';
-
-    if (dayData && dayData.slots.length > 0) {
-      dayData.slots.forEach(time => {
-        const btn = document.createElement('button');
-        btn.className = 'slot';
-        btn.textContent = time;
-        btn.addEventListener('click', () => {
-          document.getElementById('selectedTime').value = time;
-          document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-        });
-        timeSlots.appendChild(btn);
-      });
+  toggleLink.textContent = 'Or choose a custom date';
+  customDateSection.style.display = 'none';
+  toggleLink.onclick = () => {
+    if (customDateSection.style.display === 'none') {
+      // Show custom date, hide week view
+      customDateSection.style.display = 'block';
+      calendarSection.style.display = 'none';
+      toggleLink.textContent = '← Back to week view';
     } else {
-      timeSlots.innerHTML = '<p style="text-align:center;">No appointments available</p>';
+      // Show week view
+      customDateSection.style.display = 'none';
+      calendarSection.style.display = 'flex';
+      toggleLink.textContent = 'Or choose a custom date';
     }
   };
 }
@@ -522,6 +527,7 @@ document.querySelector('.step-4 .back-btn').addEventListener('click', function()
 });
 
 });
+
 </script>
 
 
