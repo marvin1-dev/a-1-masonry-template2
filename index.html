@@ -139,38 +139,47 @@
 
 
       <!-- STEP 4: PICK DATE + TIME -->
-      <div class="booking-step step-4" style="display:none;">
-        <div class="step4-loading">Loading available dates...</div>
+<!-- STEP 4: PICK DATE + TIME -->
+        <div class="booking-step step-4" style="display:none;">
+        
         <button class="back-btn">←</button>
         <h4>Date & Time</h4>
+
+        <div id="calendarLoading" class="loading-spinner" style="display:none;">
+            <div class="spinner"></div>
+            <p>Loading available dates...</p>
+        </div>
+
         <div class="service-summary">Service: <span id="step4_service">...</span></div>
 
         <div class="date-nav">
-          <button id="prevWeek">←</button>
-          <div id="calendarWeek" class="week-dates"></div>
-          <button id="nextWeek">→</button>
+            <button id="prevWeek">←</button>
+            <div id="calendarWeek" class="week-dates"></div>
+            <button id="nextWeek">→</button>
         </div>
 
         <div class="custom-date">
-          <label for="customDate">Pick another date:</label>
-          <input type="date" id="customDate">
+            <label for="customDate">Pick another date:</label>
+            <input type="date" id="customDate">
         </div>
 
         <div class="time-slots" id="timeSlots">
-          <p>Please select a date</p>
+            <p>Please select a date</p>
         </div>
 
         <form id="bookingForm">
-          <input type="hidden" name="service" id="selectedService">
-          <input type="hidden" name="date" id="selectedDate">
-          <input type="hidden" name="time" id="selectedTime">
-          <input type="hidden" name="name" id="selectedName">
-          <input type="hidden" name="email" id="selectedEmail">
+            <input type="hidden" name="service" id="selectedService">
+            <input type="hidden" name="date" id="selectedDate">
+            <input type="hidden" name="time" id="selectedTime">
+            <input type="hidden" name="name" id="selectedName">
+            <input type="hidden" name="email" id="selectedEmail">
 
-          <button type="submit">Confirm Booking</button>
+            <button type="submit">Confirm Booking</button>
         </form>
+
         <div id="bookingResult"></div>
-      </div>
+        </div>
+
 
       <!-- STEP 5: THANK YOU -->
       <div class="booking-step step-5" style="display:none; text-align:center;">
@@ -401,54 +410,53 @@ document.getElementById('bookAnotherFrom3').addEventListener('click', function()
 });
 
 function loadStep4Dates(service) {
-  const step4 = document.querySelector('.step-4');
-
-  // Reset all steps
-  document.querySelectorAll('.booking-step').forEach(step => {
-    step.style.display = 'none';
-    step.classList.remove('active');
-  });
-
-  // Show ONLY the loading overlay
-  step4.style.display = 'flex';
-  step4.querySelector('.step4-loading').style.display = 'flex';
-  step4.querySelector('.date-nav').style.display = 'none';
-  step4.querySelector('.custom-date').style.display = 'none';
-  document.getElementById('timeSlots').style.display = 'none';
-
   document.getElementById('step4_service').textContent = service;
   currentWeekStart = new Date();
 
+  // Show the spinner
+  const loadingSpinner = document.getElementById('calendarLoading');
+  loadingSpinner.style.display = 'flex';
+
+  // Clear old content while loading
+  document.getElementById('calendarWeek').innerHTML = '';
+  document.getElementById('timeSlots').innerHTML = '<p>Please select a date</p>';
+
+  // Load available dates
   loadAvailableDates(service).then(availableDates => {
     renderWeek(availableDates);
 
-    // Now reveal full step 4
-    step4.querySelector('.step4-loading').style.display = 'none';
-    step4.querySelector('.date-nav').style.display = 'flex';
-    step4.querySelector('.custom-date').style.display = 'block';
-    document.getElementById('timeSlots').style.display = 'block';
-
-    // Animate in
-    setTimeout(() => step4.classList.add('active'), 10);
+    // Hide spinner after loading
+    loadingSpinner.style.display = 'none';
   });
 
-  // Prev/next
+  // Previous Week
   document.getElementById('prevWeek').onclick = () => {
     currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-    loadAvailableDates(service).then(renderWeek);
+    loadingSpinner.style.display = 'flex';
+    loadAvailableDates(service).then(availableDates => {
+      renderWeek(availableDates);
+      loadingSpinner.style.display = 'none';
+    });
   };
 
+  // Next Week
   document.getElementById('nextWeek').onclick = () => {
     currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-    loadAvailableDates(service).then(renderWeek);
+    loadingSpinner.style.display = 'flex';
+    loadAvailableDates(service).then(availableDates => {
+      renderWeek(availableDates);
+      loadingSpinner.style.display = 'none';
+    });
   };
 
+  // Custom date picker
   document.getElementById('customDate').onchange = function() {
     document.getElementById('selectedDate').value = this.value;
     document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
     document.getElementById('timeSlots').innerHTML = '<p style="text-align:center;">Select a time</p>';
   };
 }
+
 
 
 
