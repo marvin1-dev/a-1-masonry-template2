@@ -155,6 +155,13 @@
 
         <!-- Then your service-summary and rest -->
         <div class="service-summary">Service: <span id="step4_service">...</span></div>
+        <div class="toggle-view">
+        <label class="switch">
+            <input type="checkbox" id="toggleCustomDateSwitch">
+            <span class="slider round"></span>
+        </label>
+        <span id="toggleLabel">Choose Custom Date</span>
+        </div>
 
         <div class="date-nav">
             <button id="prevWeek">←</button>
@@ -466,25 +473,27 @@ function loadStep4Dates(service) {
   };
 
   // Toggle link logic
-  const toggleLink = document.getElementById('toggleCustomDate');
-  const calendarSection = document.querySelector('.date-nav');
-  const customDateSection = document.querySelector('.custom-date');
+const toggleSwitch = document.getElementById('toggleCustomDateSwitch');
+const toggleLabel = document.getElementById('toggleLabel');
+const calendarSection = document.querySelector('.date-nav');
+const customDateSection = document.querySelector('.custom-date');
 
-  toggleLink.textContent = 'Or choose a custom date';
-  customDateSection.style.display = 'none';
-  toggleLink.onclick = () => {
-    if (customDateSection.style.display === 'none') {
-      // Show custom date, hide week view
-      customDateSection.style.display = 'block';
-      calendarSection.style.display = 'none';
-      toggleLink.textContent = '← Back to week view';
-    } else {
-      // Show week view
-      customDateSection.style.display = 'none';
-      calendarSection.style.display = 'flex';
-      toggleLink.textContent = 'Or choose a custom date';
-    }
-  };
+toggleSwitch.checked = false;
+customDateSection.style.display = 'none';
+calendarSection.style.display = 'flex';
+
+toggleSwitch.onchange = () => {
+  if (toggleSwitch.checked) {
+    customDateSection.style.display = 'block';
+    calendarSection.style.display = 'none';
+    toggleLabel.textContent = 'Back to Week View';
+  } else {
+    customDateSection.style.display = 'none';
+    calendarSection.style.display = 'flex';
+    toggleLabel.textContent = 'Choose Custom Date';
+  }
+};
+
 }
 
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
