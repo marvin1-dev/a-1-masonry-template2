@@ -304,6 +304,8 @@ function renderWeek(availableDates) {
       document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
       dayCard.classList.add('selected');
 
+      document.querySelector('.custom-date').style.display = 'none'; // Hide custom date
+
       const timeSlots = document.getElementById('timeSlots');
       timeSlots.innerHTML = '';
 
@@ -423,6 +425,8 @@ function loadStep4Dates(service) {
   document.getElementById('calendarWeek').innerHTML = '';
   document.getElementById('timeSlots').innerHTML = '<p>Please select a date</p>';
 
+  document.querySelector('.custom-date').style.display = 'block'; // Always show custom date when loading
+
   loadAvailableDates(service).then(availableDates => {
     renderWeek(availableDates);
     loadingSpinner.style.display = 'none';
@@ -446,10 +450,35 @@ function loadStep4Dates(service) {
     });
   };
 
-  document.getElementById('customDate').onchange = function() {
-    document.getElementById('selectedDate').value = this.value;
+  document.getElementById('customDate').onchange = async function() {
+    const customDate = this.value;
+    document.getElementById('selectedDate').value = customDate;
+
     document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
-    document.getElementById('timeSlots').innerHTML = '<p style="text-align:center;">Select a time</p>';
+
+    const currentService = document.getElementById('selectedService').value || document.getElementById('step4_service').textContent;
+
+    const availableDates = await loadAvailableDates(currentService);
+    const dayData = availableDates.find(d => d.date === customDate);
+
+    const timeSlots = document.getElementById('timeSlots');
+    timeSlots.innerHTML = '';
+
+    if (dayData && dayData.slots.length > 0) {
+      dayData.slots.forEach(time => {
+        const btn = document.createElement('button');
+        btn.className = 'slot';
+        btn.textContent = time;
+        btn.addEventListener('click', () => {
+          document.getElementById('selectedTime').value = time;
+          document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        });
+        timeSlots.appendChild(btn);
+      });
+    } else {
+      timeSlots.innerHTML = '<p style="text-align:center;">No appointments available</p>';
+    }
   };
 }
 
@@ -494,6 +523,7 @@ document.querySelector('.step-4 .back-btn').addEventListener('click', function()
 
 });
 </script>
+
 
 
 
