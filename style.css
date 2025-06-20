@@ -677,6 +677,14 @@ input:checked + .slider:before {
   background: #000;
 }
 
+ #confirmBookingBtn:disabled {
+  background: #ccc !important;
+  color: #888 !important;
+  cursor: not-allowed;
+  border-color: #ccc !important;
+}
+
+
 .back-btn {
   background: transparent;
   color: #253551;
