@@ -412,6 +412,13 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
         item.innerHTML = `
           <h5>${b.service}</h5>
           <p>${formattedDate} at ${b.time}</p>
+          <button class="edit-booking-btn"
+            data-service="${b.service}" 
+            data-date="${b.date}" 
+            data-time="${b.time}" 
+            data-email="${email}">
+            Edit
+          </button>
         `;
 
         bookingsDiv.appendChild(item);
@@ -434,7 +441,28 @@ document.getElementById('bookAnotherFrom3').addEventListener('click', function()
   loadStep4Dates(service);
 });
 
-function loadStep4Dates(service) {
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList.contains('edit-booking-btn')) {
+    const service = e.target.getAttribute('data-service');
+    const date = e.target.getAttribute('data-date');
+    const time = e.target.getAttribute('data-time');
+    const email = e.target.getAttribute('data-email');
+
+    document.getElementById('step2_service').value = service;
+    document.getElementById('selectedService').value = service;
+    document.getElementById('selectedEmail').value = email;
+    document.getElementById('selectedDate').value = date;
+    document.getElementById('selectedTime').value = time;
+
+    // Set editing flag
+    document.getElementById('bookingForm').dataset.editing = 'true';
+
+    showStep('.step-4');
+    loadStep4Dates(service, date, time);
+  }
+});
+
+function loadStep4Dates(service, preselectDate = null, preselectTime = null) {
   document.getElementById('step4_service').textContent = service;
   currentWeekStart = new Date();
 
@@ -450,6 +478,25 @@ function loadStep4Dates(service) {
   loadAvailableDates(service).then(availableDates => {
     renderWeek(availableDates);
     loadingSpinner.style.display = 'none';
+
+    if (preselectDate) {
+      document.getElementById('selectedDate').value = preselectDate;
+
+      const slots = availableDatesGlobal.find(d => d.date === preselectDate)?.slots || [];
+      renderTimeSlots(slots);
+
+      if (preselectTime) {
+        setTimeout(() => {
+          document.querySelectorAll('.slot').forEach(slotBtn => {
+            if (slotBtn.textContent === preselectTime) {
+              slotBtn.classList.add('selected');
+              document.getElementById('selectedTime').value = preselectTime;
+              updateConfirmButtonState();
+            }
+          });
+        }, 300);
+      }
+    }
   });
 
   document.getElementById('prevWeek').onclick = () => {
@@ -479,7 +526,6 @@ function loadStep4Dates(service) {
     updateConfirmButtonState();
   };
 
-  // Toggle link logic
   const toggleSwitch = document.getElementById('toggleCustomDateSwitch');
   const toggleLabel = document.getElementById('toggleLabel');
   const calendarSection = document.querySelector('.date-nav');
@@ -508,6 +554,9 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   const formData = new FormData(e.target);
   const data = Object.fromEntries(formData);
 
+  // Add action = 'update' or 'new'
+  data.action = document.getElementById('bookingForm').dataset.editing === 'true' ? 'update' : 'new';
+
   try {
     const response = await fetch(BOOKING_API, {
       method: 'POST',
@@ -518,6 +567,9 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     const result = await response.json();
 
     showStep('.step-5');
+
+    // Clear editing flag after submit
+    document.getElementById('bookingForm').dataset.editing = '';
 
   } catch (error) {
     console.error('Booking error:', error);
@@ -554,6 +606,8 @@ function updateConfirmButtonState() {
 }
 
 }); // DOMContentLoaded
+
+
 </script>
 
 
