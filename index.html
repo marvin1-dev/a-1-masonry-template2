@@ -260,6 +260,8 @@
 </footer>
 
 <script>
+// === FULL FINAL JS — COMPLETE with your full original Step 4 + Toggle + Edit/Cancel — NOTHING removed ===
+
 document.addEventListener('DOMContentLoaded', function() {
 
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
@@ -508,10 +510,116 @@ document.addEventListener('click', async function(e) {
   }
 });
 
+function loadStep4Dates(service) {
+  document.getElementById('step4_service').textContent = service;
+  currentWeekStart = new Date();
+
+  const loadingSpinner = document.getElementById('calendarLoading');
+  loadingSpinner.style.display = 'flex';
+
+  document.getElementById('calendarWeek').innerHTML = '';
+  document.getElementById('timeSlots').innerHTML = '<p>Please select a date</p>';
+  document.getElementById('selectedDate').value = '';
+  document.getElementById('selectedTime').value = '';
+  updateConfirmButtonState();
+
+  loadAvailableDates(service).then(availableDates => {
+    renderWeek(availableDates);
+    loadingSpinner.style.display = 'none';
+  });
+
+  document.getElementById('prevWeek').onclick = () => {
+    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    loadingSpinner.style.display = 'flex';
+    loadAvailableDates(service).then(availableDates => {
+      renderWeek(availableDates);
+      loadingSpinner.style.display = 'none';
+    });
+  };
+
+  document.getElementById('nextWeek').onclick = () => {
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    loadingSpinner.style.display = 'flex';
+    loadAvailableDates(service).then(availableDates => {
+      renderWeek(availableDates);
+      loadingSpinner.style.display = 'none';
+    });
+  };
+
+  document.getElementById('customDate').onchange = function() {
+    document.getElementById('selectedDate').value = this.value;
+    document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
+
+    const slots = availableDatesGlobal.find(d => d.date === this.value)?.slots || [];
+    renderTimeSlots(slots);
+    updateConfirmButtonState();
+  };
+
+  const toggleSwitch = document.getElementById('toggleCustomDateSwitch');
+  const toggleLabel = document.getElementById('toggleLabel');
+  const calendarSection = document.querySelector('.date-nav');
+  const customDateSection = document.querySelector('.custom-date');
+
+  toggleSwitch.checked = false;
+  customDateSection.style.display = 'none';
+  calendarSection.style.display = 'flex';
+
+  toggleSwitch.onchange = () => {
+    if (toggleSwitch.checked) {
+      customDateSection.style.display = 'block';
+      calendarSection.style.display = 'none';
+      toggleLabel.textContent = 'Back to Week View';
+    } else {
+      customDateSection.style.display = 'none';
+      calendarSection.style.display = 'flex';
+      toggleLabel.textContent = 'Choose Custom Date';
+    }
+  };
+}
+
+document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+
+  try {
+    const response = await fetch(BOOKING_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+    showStep('.step-5');
+
+  } catch (error) {
+    console.error('Booking error:', error);
+    document.getElementById('bookingResult').innerText = 'Error submitting booking. Please try again later.';
+  }
+});
+
+document.getElementById('backToStep2').addEventListener('click', function() {
+  showStep('.step-2');
+});
+
+document.getElementById('bookAnotherFrom5').addEventListener('click', function() {
+  showStep('.step-1');
+});
+
+document.querySelector('.step-2 .back-btn').addEventListener('click', function() {
+  showStep('.step-1');
+});
+
+document.querySelector('.step-4 .back-btn').addEventListener('click', function() {
+  showStep('.step-2');
+});
+
 function updateConfirmButtonState() {
   const dateSelected = document.getElementById('selectedDate').value;
   const timeSelected = document.getElementById('selectedTime').value;
   const confirmButton = document.getElementById('confirmBookingBtn');
+
   confirmButton.disabled = !(dateSelected && timeSelected);
 }
 
