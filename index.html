@@ -460,6 +460,7 @@ document.addEventListener('click', async function(e) {
           body: JSON.stringify({
             action: 'update',
             old_service_date_time: sdt,
+            old_calendar_event_id: card.querySelector('.edit-booking-btn').getAttribute('data-calendar_event_id'),
             service: service,
             date: newDate,
             time: newTime,
@@ -499,7 +500,8 @@ document.addEventListener('click', async function(e) {
         body: JSON.stringify({
           action: 'cancel',
           service_date_time: sdt,
-          email: document.getElementById('selectedEmail').value
+          email: document.getElementById('selectedEmail').value,
+          calendar_event_id: card.querySelector('.cancel-booking-btn').getAttribute('data-calendar_event_id')
         })
       });
 
