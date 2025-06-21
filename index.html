@@ -260,11 +260,14 @@
 </footer>
 
 <script>
+// === FULL FINAL JS ===
+// A-1 Masonry Booking v1.1 with Edit + Cancel + Inline Confirm
+
 document.addEventListener('DOMContentLoaded', function() {
 
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
-const BOOKING_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
-const LOOKUP_API = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
+const BOOKING_API   = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
+const LOOKUP_API    = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
 
 let currentWeekStart = new Date();
 let availableDatesGlobal = [];
@@ -372,23 +375,18 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
   e.preventDefault();
 
   const service = document.getElementById('step2_service').value;
-  const name = document.getElementById('step2_name').value;
-  const email = document.getElementById('step2_email').value;
+  const name    = document.getElementById('step2_name').value;
+  const email   = document.getElementById('step2_email').value;
 
   document.getElementById('selectedService').value = service;
-  document.getElementById('selectedName').value = name;
-  document.getElementById('selectedEmail').value = email;
+  document.getElementById('selectedName').value    = name;
+  document.getElementById('selectedEmail').value   = email;
 
   try {
     const response = await fetch(LOOKUP_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'lookup',
-        service,
-        name,
-        email
-      })
+      body: JSON.stringify({ action: 'lookup', service, name, email })
     });
 
     const result = await response.json();
@@ -400,9 +398,7 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
       bookingsDiv.innerHTML = '';
       result.bookings.forEach(b => {
         const formattedDate = new Date(b.date).toLocaleDateString('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric'
+          month: '2-digit', day: '2-digit', year: 'numeric'
         });
 
         const item = document.createElement('div');
@@ -411,19 +407,15 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
           <h5>${b.service}</h5>
           <p>${formattedDate} at ${b.time}</p>
           <div class="booking-actions">
-            <button class="edit-booking-btn"
-              data-service="${b.service}"
-              data-date="${b.date}"
-              data-time="${b.time}"
-              data-service_date_time="${b.service_date_time}">
-              Edit
-            </button>
-            <button class="cancel-booking-btn"
-              data-service_date_time="${b.service_date_time}">
-              Cancel
-            </button>
+            <button class="edit-booking-btn" data-service="${b.service}" data-date="${b.date}" data-time="${b.time}" data-service_date_time="${b.service_date_time}">Edit</button>
+            <button class="cancel-booking-btn" data-service_date_time="${b.service_date_time}">Cancel</button>
           </div>
           <div class="booking-status"></div>
+          <div class="confirm-cancel" style="display:none;">
+            <p>Confirm cancel?</p>
+            <button class="confirm-cancel-yes">Yes</button>
+            <button class="confirm-cancel-no">No</button>
+          </div>
         `;
         bookingsDiv.appendChild(item);
       });
@@ -446,69 +438,75 @@ document.getElementById('bookAnotherFrom3').addEventListener('click', function()
 });
 
 document.addEventListener('click', async function(e) {
+
   if (e.target && e.target.classList.contains('edit-booking-btn')) {
     const service = e.target.getAttribute('data-service');
-    const date = e.target.getAttribute('data-date');
-    const time = e.target.getAttribute('data-time');
-    const sdt = e.target.getAttribute('data-service_date_time');
-    const card = e.target.closest('.booking-card');
+    const date    = e.target.getAttribute('data-date');
+    const time    = e.target.getAttribute('data-time');
+    const sdt     = e.target.getAttribute('data-service_date_time');
+    const card    = e.target.closest('.booking-card');
 
     const newDate = prompt('Enter new date (YYYY-MM-DD):', date);
     const newTime = prompt('Enter new time (example: 10:00 AM):', time);
 
     if (newDate && newTime) {
-      const confirmUpdate = confirm(`Confirm update to: ${newDate} at ${newTime}?`);
-      if (confirmUpdate) {
-        try {
-          const updateResponse = await fetch(BOOKING_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'update',
-              old_service_date_time: sdt,
-              service: service,
-              date: newDate,
-              time: newTime,
-              email: document.getElementById('selectedEmail').value,
-              name: document.getElementById('selectedName').value
-            })
-          });
+      try {
+        const updateResponse = await fetch(BOOKING_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update',
+            old_service_date_time: sdt,
+            service: service,
+            date: newDate,
+            time: newTime,
+            email: document.getElementById('selectedEmail').value,
+            name: document.getElementById('selectedName').value
+          })
+        });
 
-          const updateResult = await updateResponse.json();
-          card.querySelector('.booking-status').innerText = updateResult.message || 'Booking updated!';
+        const updateResult = await updateResponse.json();
+        card.querySelector('.booking-status').innerText = updateResult.message || 'Booking updated!';
 
-        } catch (error) {
-          console.error('Update error:', error);
-          card.querySelector('.booking-status').innerText = 'Error updating booking.';
-        }
+      } catch (error) {
+        console.error('Update error:', error);
+        card.querySelector('.booking-status').innerText = 'Error updating booking.';
       }
     }
   }
 
   if (e.target && e.target.classList.contains('cancel-booking-btn')) {
-    const sdt = e.target.getAttribute('data-service_date_time');
     const card = e.target.closest('.booking-card');
-    const confirmCancel = confirm('Are you sure you want to cancel this booking?');
+    card.querySelector('.confirm-cancel').style.display = 'block';
+  }
 
-    if (confirmCancel) {
-      try {
-        const cancelResponse = await fetch(BOOKING_API, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'cancel',
-            service_date_time: sdt,
-            email: document.getElementById('selectedEmail').value
-          })
-        });
+  if (e.target && e.target.classList.contains('confirm-cancel-no')) {
+    const confirmBox = e.target.closest('.confirm-cancel');
+    confirmBox.style.display = 'none';
+  }
 
-        const cancelResult = await cancelResponse.json();
-        card.querySelector('.booking-status').innerText = cancelResult.message || 'Booking cancelled!';
+  if (e.target && e.target.classList.contains('confirm-cancel-yes')) {
+    const card = e.target.closest('.booking-card');
+    const sdt  = card.querySelector('.cancel-booking-btn').getAttribute('data-service_date_time');
 
-      } catch (error) {
-        console.error('Cancel error:', error);
-        card.querySelector('.booking-status').innerText = 'Error cancelling booking.';
-      }
+    try {
+      const cancelResponse = await fetch(BOOKING_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cancel',
+          service_date_time: sdt,
+          email: document.getElementById('selectedEmail').value
+        })
+      });
+
+      const cancelResult = await cancelResponse.json();
+      card.querySelector('.booking-status').innerText = cancelResult.message || 'Booking cancelled!';
+      card.querySelector('.confirm-cancel').style.display = 'none';
+
+    } catch (error) {
+      console.error('Cancel error:', error);
+      card.querySelector('.booking-status').innerText = 'Error cancelling booking.';
     }
   }
 });
@@ -518,11 +516,7 @@ function updateConfirmButtonState() {
   const timeSelected = document.getElementById('selectedTime').value;
   const confirmButton = document.getElementById('confirmBookingBtn');
 
-  if (dateSelected && timeSelected) {
-    confirmButton.disabled = false;
-  } else {
-    confirmButton.disabled = true;
-  }
+  confirmButton.disabled = !(dateSelected && timeSelected);
 }
 
 });
