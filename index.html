@@ -411,8 +411,19 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
         item.innerHTML = `
           <h5>${b.service}</h5>
           <p>${formattedDate} at ${b.time}</p>
-          <button class="edit-booking-btn" data-service="${b.service}" data-date="${b.date}" data-time="${b.time}" data-service_date_time="${b.service_date_time}">Edit</button>
-          <button class="cancel-booking-btn" data-service_date_time="${b.service_date_time}">Cancel</button>
+          <button class="edit-booking-btn"
+            data-service="${b.service}"
+            data-date="${b.date}"
+            data-time="${b.time}"
+            data-service_date_time="${b.service_date_time}"
+            data-calendar_event_id="${b.calendar_event_id}">
+            Edit
+          </button>
+          <button class="cancel-booking-btn"
+            data-service_date_time="${b.service_date_time}"
+            data-calendar_event_id="${b.calendar_event_id}">
+            Cancel
+          </button>
         `;
         bookingsDiv.appendChild(item);
       });
@@ -440,6 +451,7 @@ document.addEventListener('click', async function(e) {
     const date = e.target.getAttribute('data-date');
     const time = e.target.getAttribute('data-time');
     const serviceDateTime = e.target.getAttribute('data-service_date_time');
+    const calendarEventId = e.target.getAttribute('data-calendar_event_id');
 
     const newDate = prompt('Enter new date (YYYY-MM-DD):', date);
     const newTime = prompt('Enter new time (example: 10:00 AM):', time);
@@ -454,6 +466,7 @@ document.addEventListener('click', async function(e) {
             body: JSON.stringify({
               action: 'update',
               old_service_date_time: serviceDateTime,
+              old_calendar_event_id: calendarEventId,
               service: service,
               date: newDate,
               time: newTime,
@@ -476,6 +489,7 @@ document.addEventListener('click', async function(e) {
 
   if (e.target && e.target.classList.contains('cancel-booking-btn')) {
     const serviceDateTime = e.target.getAttribute('data-service_date_time');
+    const calendarEventId = e.target.getAttribute('data-calendar_event_id');
     const confirmCancel = confirm('Are you sure you want to cancel this booking?');
 
     if (confirmCancel) {
@@ -486,6 +500,7 @@ document.addEventListener('click', async function(e) {
           body: JSON.stringify({
             action: 'cancel',
             service_date_time: serviceDateTime,
+            calendar_event_id: calendarEventId,
             email: document.getElementById('selectedEmail').value
           })
         });
@@ -500,112 +515,6 @@ document.addEventListener('click', async function(e) {
       }
     }
   }
-});
-
-function loadStep4Dates(service) {
-  document.getElementById('step4_service').textContent = service;
-  currentWeekStart = new Date();
-
-  const loadingSpinner = document.getElementById('calendarLoading');
-  loadingSpinner.style.display = 'flex';
-
-  document.getElementById('calendarWeek').innerHTML = '';
-  document.getElementById('timeSlots').innerHTML = '<p>Please select a date</p>';
-  document.getElementById('selectedDate').value = '';
-  document.getElementById('selectedTime').value = '';
-  updateConfirmButtonState();
-
-  loadAvailableDates(service).then(availableDates => {
-    renderWeek(availableDates);
-    loadingSpinner.style.display = 'none';
-  });
-
-  document.getElementById('prevWeek').onclick = () => {
-    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-    loadingSpinner.style.display = 'flex';
-    loadAvailableDates(service).then(availableDates => {
-      renderWeek(availableDates);
-      loadingSpinner.style.display = 'none';
-    });
-  };
-
-  document.getElementById('nextWeek').onclick = () => {
-    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-    loadingSpinner.style.display = 'flex';
-    loadAvailableDates(service).then(availableDates => {
-      renderWeek(availableDates);
-      loadingSpinner.style.display = 'none';
-    });
-  };
-
-  document.getElementById('customDate').onchange = function() {
-    document.getElementById('selectedDate').value = this.value;
-    document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
-
-    const slots = availableDatesGlobal.find(d => d.date === this.value)?.slots || [];
-    renderTimeSlots(slots);
-    updateConfirmButtonState();
-  };
-
-  const toggleSwitch = document.getElementById('toggleCustomDateSwitch');
-  const toggleLabel = document.getElementById('toggleLabel');
-  const calendarSection = document.querySelector('.date-nav');
-  const customDateSection = document.querySelector('.custom-date');
-
-  toggleSwitch.checked = false;
-  customDateSection.style.display = 'none';
-  calendarSection.style.display = 'flex';
-
-  toggleSwitch.onchange = () => {
-    if (toggleSwitch.checked) {
-      customDateSection.style.display = 'block';
-      calendarSection.style.display = 'none';
-      toggleLabel.textContent = 'Back to Week View';
-    } else {
-      customDateSection.style.display = 'none';
-      calendarSection.style.display = 'flex';
-      toggleLabel.textContent = 'Choose Custom Date';
-    }
-  };
-}
-
-document.getElementById('bookingForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-
-  const formData = new FormData(e.target);
-  const data = Object.fromEntries(formData);
-
-  try {
-    const response = await fetch(BOOKING_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-
-    const result = await response.json();
-
-    showStep('.step-5');
-
-  } catch (error) {
-    console.error('Booking error:', error);
-    document.getElementById('bookingResult').innerText = 'Error submitting booking. Please try again later.';
-  }
-});
-
-document.getElementById('backToStep2').addEventListener('click', function() {
-  showStep('.step-2');
-});
-
-document.getElementById('bookAnotherFrom5').addEventListener('click', function() {
-  showStep('.step-1');
-});
-
-document.querySelector('.step-2 .back-btn').addEventListener('click', function() {
-  showStep('.step-1');
-});
-
-document.querySelector('.step-4 .back-btn').addEventListener('click', function() {
-  showStep('.step-2');
 });
 
 function updateConfirmButtonState() {
