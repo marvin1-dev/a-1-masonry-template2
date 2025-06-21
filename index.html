@@ -290,6 +290,10 @@ async function loadAvailableDates(service) {
     const response = await fetch(`${AVAILABLE_API}?service=${encodeURIComponent(service)}`);
     const data = await response.json();
     availableDatesGlobal = data.available_dates || [];
+    console.log('DEBUG: Available dates from API:', availableDatesGlobal);
+    console.log('DEBUG: Current week start:', currentWeekStart);
+    console.log('DEBUG: Week dates:', getWeekDates(currentWeekStart).map(d => formatDate(d)));
+
     return availableDatesGlobal;
   } catch (err) {
     console.error('Failed to load dates:', err);
