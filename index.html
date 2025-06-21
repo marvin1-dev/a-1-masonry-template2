@@ -484,7 +484,12 @@ document.addEventListener('click', async function(e) {
         });
 
         const updateResult = await updateResponse.json();
-        card.querySelector('.booking-status').innerText = updateResult.message || 'Booking updated!';
+        if (updateResult.error) {
+            card.querySelector('.booking-status').innerText = updateResult.error;
+        } else {
+            card.querySelector('.booking-status').innerText = updateResult.message || 'Booking updated!';
+        }
+
 
       } catch (error) {
         console.error('Update error:', error);
