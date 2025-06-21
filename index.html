@@ -411,7 +411,12 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
           <p>${formattedDate} at ${b.time}</p>
           <div class="booking-actions">
             <button class="edit-booking-btn" data-service="${b.service}" data-date="${b.date}" data-time="${b.time}" data-service_date_time="${b.service_date_time}">Edit</button>
-            <button class="cancel-booking-btn" data-service_date_time="${b.service_date_time}">Cancel</button>
+            <button class="cancel-booking-btn" 
+            data-service_date_time="${b.service_date_time}" 
+            data-calendar_event_id="${b.calendar_event_id}">
+            Cancel
+            </button>
+            
           </div>
           <div class="booking-status"></div>
           <div class="confirm-cancel" style="display:none;">
