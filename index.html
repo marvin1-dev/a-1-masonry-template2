@@ -260,9 +260,6 @@
 </footer>
 
 <script>
-// === FULL FINAL JS ===
-// A-1 Masonry Booking v1.1 with Edit + Cancel + Inline Confirm
-
 document.addEventListener('DOMContentLoaded', function() {
 
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
@@ -515,7 +512,6 @@ function updateConfirmButtonState() {
   const dateSelected = document.getElementById('selectedDate').value;
   const timeSelected = document.getElementById('selectedTime').value;
   const confirmButton = document.getElementById('confirmBookingBtn');
-
   confirmButton.disabled = !(dateSelected && timeSelected);
 }
 
