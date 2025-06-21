@@ -400,27 +400,20 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
       const bookingsDiv = document.getElementById('currentBookings');
       bookingsDiv.innerHTML = '';
       result.bookings.forEach(b => {
-        const item = document.createElement('div');
-        item.className = 'booking-card';
-
         const formattedDate = new Date(b.date).toLocaleDateString('en-US', {
           month: '2-digit',
           day: '2-digit',
           year: 'numeric'
         });
 
+        const item = document.createElement('div');
+        item.className = 'booking-card';
         item.innerHTML = `
           <h5>${b.service}</h5>
           <p>${formattedDate} at ${b.time}</p>
-          <button class="edit-booking-btn"
-            data-service="${b.service}" 
-            data-date="${b.date}" 
-            data-time="${b.time}" 
-            data-email="${email}">
-            Edit
-          </button>
+          <button class="edit-booking-btn" data-service="${b.service}" data-date="${b.date}" data-time="${b.time}" data-service_date_time="${b.service_date_time}">Edit</button>
+          <button class="cancel-booking-btn" data-service_date_time="${b.service_date_time}">Cancel</button>
         `;
-
         bookingsDiv.appendChild(item);
       });
 
@@ -441,28 +434,75 @@ document.getElementById('bookAnotherFrom3').addEventListener('click', function()
   loadStep4Dates(service);
 });
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', async function(e) {
   if (e.target && e.target.classList.contains('edit-booking-btn')) {
     const service = e.target.getAttribute('data-service');
     const date = e.target.getAttribute('data-date');
     const time = e.target.getAttribute('data-time');
-    const email = e.target.getAttribute('data-email');
+    const serviceDateTime = e.target.getAttribute('data-service_date_time');
 
-    document.getElementById('step2_service').value = service;
-    document.getElementById('selectedService').value = service;
-    document.getElementById('selectedEmail').value = email;
-    document.getElementById('selectedDate').value = date;
-    document.getElementById('selectedTime').value = time;
+    const newDate = prompt('Enter new date (YYYY-MM-DD):', date);
+    const newTime = prompt('Enter new time (example: 10:00 AM):', time);
 
-    // Set editing flag
-    document.getElementById('bookingForm').dataset.editing = 'true';
+    if (newDate && newTime) {
+      const confirmUpdate = confirm(`Confirm update to: ${newDate} at ${newTime}?`);
+      if (confirmUpdate) {
+        try {
+          const updateResponse = await fetch(BOOKING_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'update',
+              old_service_date_time: serviceDateTime,
+              service: service,
+              date: newDate,
+              time: newTime,
+              email: document.getElementById('selectedEmail').value,
+              name: document.getElementById('selectedName').value
+            })
+          });
 
-    showStep('.step-4');
-    loadStep4Dates(service, date, time);
+          const updateResult = await updateResponse.json();
+          alert(updateResult.message || 'Booking updated!');
+          document.getElementById('checkForm').dispatchEvent(new Event('submit'));
+
+        } catch (error) {
+          console.error('Update error:', error);
+          alert('Error updating booking. Please try again.');
+        }
+      }
+    }
+  }
+
+  if (e.target && e.target.classList.contains('cancel-booking-btn')) {
+    const serviceDateTime = e.target.getAttribute('data-service_date_time');
+    const confirmCancel = confirm('Are you sure you want to cancel this booking?');
+
+    if (confirmCancel) {
+      try {
+        const cancelResponse = await fetch(BOOKING_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'cancel',
+            service_date_time: serviceDateTime,
+            email: document.getElementById('selectedEmail').value
+          })
+        });
+
+        const cancelResult = await cancelResponse.json();
+        alert(cancelResult.message || 'Booking cancelled!');
+        document.getElementById('checkForm').dispatchEvent(new Event('submit'));
+
+      } catch (error) {
+        console.error('Cancel error:', error);
+        alert('Error cancelling booking. Please try again.');
+      }
+    }
   }
 });
 
-function loadStep4Dates(service, preselectDate = null, preselectTime = null) {
+function loadStep4Dates(service) {
   document.getElementById('step4_service').textContent = service;
   currentWeekStart = new Date();
 
@@ -478,25 +518,6 @@ function loadStep4Dates(service, preselectDate = null, preselectTime = null) {
   loadAvailableDates(service).then(availableDates => {
     renderWeek(availableDates);
     loadingSpinner.style.display = 'none';
-
-    if (preselectDate) {
-      document.getElementById('selectedDate').value = preselectDate;
-
-      const slots = availableDatesGlobal.find(d => d.date === preselectDate)?.slots || [];
-      renderTimeSlots(slots);
-
-      if (preselectTime) {
-        setTimeout(() => {
-          document.querySelectorAll('.slot').forEach(slotBtn => {
-            if (slotBtn.textContent === preselectTime) {
-              slotBtn.classList.add('selected');
-              document.getElementById('selectedTime').value = preselectTime;
-              updateConfirmButtonState();
-            }
-          });
-        }, 300);
-      }
-    }
   });
 
   document.getElementById('prevWeek').onclick = () => {
@@ -554,9 +575,6 @@ document.getElementById('bookingForm').addEventListener('submit', async function
   const formData = new FormData(e.target);
   const data = Object.fromEntries(formData);
 
-  // Add action = 'update' or 'new'
-  data.action = document.getElementById('bookingForm').dataset.editing === 'true' ? 'update' : 'new';
-
   try {
     const response = await fetch(BOOKING_API, {
       method: 'POST',
@@ -567,9 +585,6 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     const result = await response.json();
 
     showStep('.step-5');
-
-    // Clear editing flag after submit
-    document.getElementById('bookingForm').dataset.editing = '';
 
   } catch (error) {
     console.error('Booking error:', error);
@@ -605,7 +620,8 @@ function updateConfirmButtonState() {
   }
 }
 
-}); // DOMContentLoaded
+});
+
 
 
 </script>
