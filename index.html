@@ -316,7 +316,6 @@ function renderWeek(availableDates) {
       document.getElementById('selectedDate').value = dateStr;
       document.querySelectorAll('.day-card').forEach(el => el.classList.remove('selected'));
       dayCard.classList.add('selected');
-
       renderTimeSlots(slots);
       updateConfirmButtonState();
     });
@@ -411,19 +410,20 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
         item.innerHTML = `
           <h5>${b.service}</h5>
           <p>${formattedDate} at ${b.time}</p>
-          <button class="edit-booking-btn"
-            data-service="${b.service}"
-            data-date="${b.date}"
-            data-time="${b.time}"
-            data-service_date_time="${b.service_date_time}"
-            data-calendar_event_id="${b.calendar_event_id}">
-            Edit
-          </button>
-          <button class="cancel-booking-btn"
-            data-service_date_time="${b.service_date_time}"
-            data-calendar_event_id="${b.calendar_event_id}">
-            Cancel
-          </button>
+          <div class="booking-actions">
+            <button class="edit-booking-btn"
+              data-service="${b.service}"
+              data-date="${b.date}"
+              data-time="${b.time}"
+              data-service_date_time="${b.service_date_time}">
+              Edit
+            </button>
+            <button class="cancel-booking-btn"
+              data-service_date_time="${b.service_date_time}">
+              Cancel
+            </button>
+          </div>
+          <div class="booking-status"></div>
         `;
         bookingsDiv.appendChild(item);
       });
@@ -450,8 +450,8 @@ document.addEventListener('click', async function(e) {
     const service = e.target.getAttribute('data-service');
     const date = e.target.getAttribute('data-date');
     const time = e.target.getAttribute('data-time');
-    const serviceDateTime = e.target.getAttribute('data-service_date_time');
-    const calendarEventId = e.target.getAttribute('data-calendar_event_id');
+    const sdt = e.target.getAttribute('data-service_date_time');
+    const card = e.target.closest('.booking-card');
 
     const newDate = prompt('Enter new date (YYYY-MM-DD):', date);
     const newTime = prompt('Enter new time (example: 10:00 AM):', time);
@@ -465,8 +465,7 @@ document.addEventListener('click', async function(e) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               action: 'update',
-              old_service_date_time: serviceDateTime,
-              old_calendar_event_id: calendarEventId,
+              old_service_date_time: sdt,
               service: service,
               date: newDate,
               time: newTime,
@@ -476,20 +475,19 @@ document.addEventListener('click', async function(e) {
           });
 
           const updateResult = await updateResponse.json();
-          alert(updateResult.message || 'Booking updated!');
-          document.getElementById('checkForm').dispatchEvent(new Event('submit'));
+          card.querySelector('.booking-status').innerText = updateResult.message || 'Booking updated!';
 
         } catch (error) {
           console.error('Update error:', error);
-          alert('Error updating booking. Please try again.');
+          card.querySelector('.booking-status').innerText = 'Error updating booking.';
         }
       }
     }
   }
 
   if (e.target && e.target.classList.contains('cancel-booking-btn')) {
-    const serviceDateTime = e.target.getAttribute('data-service_date_time');
-    const calendarEventId = e.target.getAttribute('data-calendar_event_id');
+    const sdt = e.target.getAttribute('data-service_date_time');
+    const card = e.target.closest('.booking-card');
     const confirmCancel = confirm('Are you sure you want to cancel this booking?');
 
     if (confirmCancel) {
@@ -499,19 +497,17 @@ document.addEventListener('click', async function(e) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'cancel',
-            service_date_time: serviceDateTime,
-            calendar_event_id: calendarEventId,
+            service_date_time: sdt,
             email: document.getElementById('selectedEmail').value
           })
         });
 
         const cancelResult = await cancelResponse.json();
-        alert(cancelResult.message || 'Booking cancelled!');
-        document.getElementById('checkForm').dispatchEvent(new Event('submit'));
+        card.querySelector('.booking-status').innerText = cancelResult.message || 'Booking cancelled!';
 
       } catch (error) {
         console.error('Cancel error:', error);
-        alert('Error cancelling booking. Please try again.');
+        card.querySelector('.booking-status').innerText = 'Error cancelling booking.';
       }
     }
   }
