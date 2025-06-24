@@ -514,7 +514,7 @@ document.addEventListener('click', async function(e) {
                 availableSlots.forEach(timeStr => {
                     const option = document.createElement('option');
                     option.value = timeStr;
-                    option.textContent = timeStr;
+                    option.textContent = formatTime24to12(timeStr); // user sees 12h format
                     editTimeSelect.appendChild(option);
                 });
             } else {
