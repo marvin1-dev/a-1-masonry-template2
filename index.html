@@ -451,6 +451,9 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
                     <!-- Options populated dynamically -->
                 </select>
                 </label>
+                <div class="edit-time-loading" style="margin-top: 0.5rem; font-size: 0.9rem; color: #555; display: none;">
+                    Looking for available times...
+                </div>                
               <button class="save-edit-btn">Save</button>
               <button class="cancel-edit-btn">Cancel</button>
           </div>
@@ -494,7 +497,11 @@ document.addEventListener('click', async function(e) {
 
         const editDateInput = card.querySelector('.edit-date');
         const editTimeSelect = card.querySelector('.edit-time');
+        const loadingText = card.querySelector('.edit-time-loading');
         const service = card.querySelector('.edit-booking-btn').getAttribute('data-service');
+
+            // show loading
+        loadingText.style.display = 'block';
 
         // === First, load dates for this service
         loadAvailableDates(service).then(() => {
@@ -516,6 +523,8 @@ document.addEventListener('click', async function(e) {
                 option.textContent = 'No available times';
                 editTimeSelect.appendChild(option);
             }
+            // hide loading after populating dropdown
+            loadingText.style.display = 'none';            
         });
 
         // === Update dropdown when user changes date
