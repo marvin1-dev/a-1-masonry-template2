@@ -158,10 +158,23 @@ nav .btn:hover {
 
 .two-column {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4rem;
   align-items: flex-start;
 }
+
+@media (max-width: 768px) {
+    .two-column {
+        flex-direction: column;   /* CLEAN and clear */
+        flex-wrap: nowrap;        /* REMOVE wrap to avoid fighting */
+    }
+
+    #book .container.two-column {
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+}
+
 
 /* --- BOOK SECTION --- */
 #book .container.two-column {
@@ -1023,9 +1036,6 @@ footer {
 
 /* --- MOBILE --- */
 @media (max-width: 768px) {
-  .two-column {
-    flex-direction: column;
-  }
 
   header {
     flex-direction: column;
