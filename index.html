@@ -378,11 +378,20 @@ function showStep(stepClass) {
 }
 
 function formatTime24to12(timeStr) {
+  if (!timeStr || !timeStr.includes(':')) {
+    return 'Invalid Time';
+  }
+
   const [hour, minute] = timeStr.split(':').map(Number);
+  if (isNaN(hour) || isNaN(minute)) {
+    return 'Invalid Time';
+  }
+
   const ampm = hour >= 12 ? 'PM' : 'AM';
   const hour12 = hour % 12 || 12;
   return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
 }
+
 
 
 document.querySelectorAll('.book-btn').forEach(button => {
@@ -538,7 +547,7 @@ document.addEventListener('click', async function(e) {
                 availableSlots.forEach(timeStr => {
                     const option = document.createElement('option');
                     option.value = timeStr;
-                    option.textContent = timeStr;
+                    option.textContent = formatTime24to12(timeStr);
                     editTimeSelect.appendChild(option);
                 });
             } else {
