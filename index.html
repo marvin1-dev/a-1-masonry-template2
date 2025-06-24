@@ -260,8 +260,6 @@
 </footer>
 
 <script>
-// === FULL FINAL JS — COMPLETE with your full original Step 4 + Toggle + Edit/Cancel — NOTHING removed ===
-
 document.addEventListener('DOMContentLoaded', function() {
 
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
@@ -290,10 +288,6 @@ async function loadAvailableDates(service) {
     const response = await fetch(`${AVAILABLE_API}?service=${encodeURIComponent(service)}`);
     const data = await response.json();
     availableDatesGlobal = data.available_dates || [];
-    console.log('DEBUG: Available dates from API:', availableDatesGlobal);
-    console.log('DEBUG: Current week start:', currentWeekStart);
-    console.log('DEBUG: Week dates:', getWeekDates(currentWeekStart).map(d => formatDate(d)));
-
     return availableDatesGlobal;
   } catch (err) {
     console.error('Failed to load dates:', err);
@@ -400,9 +394,8 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
       const bookingsDiv = document.getElementById('currentBookings');
       bookingsDiv.innerHTML = '';
       result.bookings.forEach(b => {
-        const formattedDate = new Date(b.date).toLocaleDateString('en-US', {
-          month: '2-digit', day: '2-digit', year: 'numeric'
-        });
+        const [year, month, day] = b.date.split('-');
+        const formattedDate = `${month}/${day}/${year}`;
 
         const item = document.createElement('div');
         item.className = 'booking-card';
@@ -410,28 +403,35 @@ document.getElementById('checkForm').addEventListener('submit', async function(e
           <h5>${b.service}</h5>
           <p>${formattedDate} at ${b.time}</p>
           <div class="booking-actions">
-            <button class="edit-booking-btn" 
-            data-service="${b.service}" 
-            data-date="${b.date}" 
-            data-time="${b.time}" 
-            data-service_date_time="${b.service_date_time}"
-            data-calendar_event_id="${b.calendar_event_id}">
-            Edit
-            </button>
-
-
-            <button class="cancel-booking-btn" 
-            data-service_date_time="${b.service_date_time}" 
-            data-calendar_event_id="${b.calendar_event_id}">
-            Cancel
-            </button>
-            
+              <button class="edit-booking-btn" 
+              data-service="${b.service}" 
+              data-date="${b.date}" 
+              data-time="${b.time}" 
+              data-service_date_time="${b.service_date_time}"
+              data-calendar_event_id="${b.calendar_event_id}">
+              Edit
+              </button>
+              <button class="cancel-booking-btn" 
+              data-service_date_time="${b.service_date_time}" 
+              data-calendar_event_id="${b.calendar_event_id}">
+              Cancel
+              </button>
           </div>
+
+          <div class="edit-form" style="display:none;">
+              <label>New Date:
+              <input type="date" class="edit-date" value="${b.date}"></label>
+              <label>New Time:
+              <input type="time" class="edit-time"></label>
+              <button class="save-edit-btn">Save</button>
+              <button class="cancel-edit-btn">Cancel</button>
+          </div>
+
           <div class="booking-status"></div>
           <div class="confirm-cancel" style="display:none;">
-            <p>Confirm cancel?</p>
-            <button class="confirm-cancel-yes">Yes</button>
-            <button class="confirm-cancel-no">No</button>
+              <p>Confirm cancel?</p>
+              <button class="confirm-cancel-yes">Yes</button>
+              <button class="confirm-cancel-no">No</button>
           </div>
         `;
         bookingsDiv.appendChild(item);
@@ -457,45 +457,56 @@ document.getElementById('bookAnotherFrom3').addEventListener('click', function()
 document.addEventListener('click', async function(e) {
 
   if (e.target && e.target.classList.contains('edit-booking-btn')) {
-    const service = e.target.getAttribute('data-service');
-    const date    = e.target.getAttribute('data-date');
-    const time    = e.target.getAttribute('data-time');
-    const sdt     = e.target.getAttribute('data-service_date_time');
-    const card    = e.target.closest('.booking-card');
+    const card = e.target.closest('.booking-card');
+    card.querySelector('.edit-form').style.display = 'block';
+    card.classList.add('open-edit');
 
-    const newDate = prompt('Enter new date (YYYY-MM-DD):', date);
-    const newTime = prompt('Enter new time (example: 10:00 AM):', time);
+  }
 
-    if (newDate && newTime) {
-      try {
-        const updateResponse = await fetch(BOOKING_API, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'update',
-            old_service_date_time: sdt,
-            old_calendar_event_id: card.querySelector('.edit-booking-btn').getAttribute('data-calendar_event_id'),
-            service: service,
-            date: newDate,
-            time: newTime,
-            email: document.getElementById('selectedEmail').value,
-            name: document.getElementById('selectedName').value
-          })
-        });
+  if (e.target && e.target.classList.contains('cancel-edit-btn')) {
+    const card = e.target.closest('.booking-card');
+    card.querySelector('.edit-form').style.display = 'none';
+    card.classList.remove('open-edit');
 
-        const updateResult = await updateResponse.json();
-        if (updateResult.error) {
-            card.querySelector('.booking-status').innerText = updateResult.error;
-        } else {
-            card.querySelector('.booking-status').innerText = updateResult.message || 'Booking updated!';
-        }
+  }
 
+  if (e.target && e.target.classList.contains('save-edit-btn')) {
+    const card = e.target.closest('.booking-card');
+    const newDate = card.querySelector('.edit-date').value;
+    const newTime = card.querySelector('.edit-time').value;
 
-      } catch (error) {
-        console.error('Update error:', error);
-        card.querySelector('.booking-status').innerText = 'Error updating booking.';
+    const sdt = card.querySelector('.edit-booking-btn').getAttribute('data-service_date_time');
+    const service = card.querySelector('.edit-booking-btn').getAttribute('data-service');
+
+    fetch(BOOKING_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update',
+        old_service_date_time: sdt,
+        old_calendar_event_id: card.querySelector('.edit-booking-btn').getAttribute('data-calendar_event_id'),
+        service: service,
+        date: newDate,
+        time: newTime,
+        email: document.getElementById('selectedEmail').value,
+        name: document.getElementById('selectedName').value
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.error) {
+        card.querySelector('.booking-status').innerText = result.error;
+      } else {
+        card.querySelector('.booking-status').innerText = result.message || 'Booking updated!';
+        card.querySelector('.edit-form').style.display = 'none';
+        card.classList.remove('open-edit');
+
       }
-    }
+    })
+    .catch(error => {
+      console.error('Update error:', error);
+      card.querySelector('.booking-status').innerText = 'Error updating booking.';
+    });
   }
 
   if (e.target && e.target.classList.contains('cancel-booking-btn')) {
@@ -512,26 +523,25 @@ document.addEventListener('click', async function(e) {
     const card = e.target.closest('.booking-card');
     const sdt  = card.querySelector('.cancel-booking-btn').getAttribute('data-service_date_time');
 
-    try {
-      const cancelResponse = await fetch(BOOKING_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'cancel',
-          service_date_time: sdt,
-          email: document.getElementById('selectedEmail').value,
-          calendar_event_id: card.querySelector('.cancel-booking-btn').getAttribute('data-calendar_event_id')
-        })
-      });
-
-      const cancelResult = await cancelResponse.json();
+    fetch(BOOKING_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'cancel',
+        service_date_time: sdt,
+        email: document.getElementById('selectedEmail').value,
+        calendar_event_id: card.querySelector('.cancel-booking-btn').getAttribute('data-calendar_event_id')
+      })
+    })
+    .then(response => response.json())
+    .then(cancelResult => {
       card.querySelector('.booking-status').innerText = cancelResult.message || 'Booking cancelled!';
       card.querySelector('.confirm-cancel').style.display = 'none';
-
-    } catch (error) {
+    })
+    .catch(error => {
       console.error('Cancel error:', error);
       card.querySelector('.booking-status').innerText = 'Error cancelling booking.';
-    }
+    });
   }
 });
 
@@ -578,27 +588,6 @@ function loadStep4Dates(service) {
     const slots = availableDatesGlobal.find(d => d.date === this.value)?.slots || [];
     renderTimeSlots(slots);
     updateConfirmButtonState();
-  };
-
-  const toggleSwitch = document.getElementById('toggleCustomDateSwitch');
-  const toggleLabel = document.getElementById('toggleLabel');
-  const calendarSection = document.querySelector('.date-nav');
-  const customDateSection = document.querySelector('.custom-date');
-
-  toggleSwitch.checked = false;
-  customDateSection.style.display = 'none';
-  calendarSection.style.display = 'flex';
-
-  toggleSwitch.onchange = () => {
-    if (toggleSwitch.checked) {
-      customDateSection.style.display = 'block';
-      calendarSection.style.display = 'none';
-      toggleLabel.textContent = 'Back to Week View';
-    } else {
-      customDateSection.style.display = 'none';
-      calendarSection.style.display = 'flex';
-      toggleLabel.textContent = 'Choose Custom Date';
-    }
   };
 }
 
@@ -649,10 +638,8 @@ function updateConfirmButtonState() {
 }
 
 });
-
-
-
 </script>
+
 
 
 
