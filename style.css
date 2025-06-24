@@ -197,6 +197,31 @@ nav .btn:hover {
 }
 
 
+/* General column-left and column-right for two-column sections */
+.column-left {
+  flex: 1 1 50%;
+  max-width: 550px;
+}
+
+.column-right {
+  flex: 1 1 50%;
+  max-width: 550px;
+}
+
+.column-left img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .column-left, .column-right {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+
 /* STEP 1 + STEP 2 WRAPPERS */
 /* --- START: Booking Panel Styles --- */
 .booking-panel {
