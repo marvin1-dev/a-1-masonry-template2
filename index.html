@@ -260,6 +260,24 @@
 </footer>
 
 <script>
+
+let availableDatesGlobal = [];
+
+function updateBookAnotherButton() {
+  const anyEditOpen = document.querySelector('.edit-form[style*="display: block"]');
+  const anyCancelOpen = document.querySelector('.confirm-cancel[style*="display: block"]');
+  
+  const btn = document.getElementById('bookAnotherFrom3');
+  
+  if (anyEditOpen || anyCancelOpen) {
+    btn.disabled = true;
+    btn.classList.add('disabled');
+  } else {
+    btn.disabled = false;
+    btn.classList.remove('disabled');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
 const AVAILABLE_API = 'https://6p764d9nkl.execute-api.us-east-1.amazonaws.com/default/A1Available-dates';
@@ -267,7 +285,6 @@ const BOOKING_API   = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/de
 const LOOKUP_API    = 'https://de4igqskmj.execute-api.us-east-1.amazonaws.com/default/A1Book';
 
 let currentWeekStart = new Date();
-let availableDatesGlobal = [];
 
 function formatDate(dateObj) {
   return dateObj.toISOString().split('T')[0];
@@ -452,6 +469,8 @@ document.getElementById('bookAnotherFrom3').addEventListener('click', function()
   showStep('.step-4');
   const service = document.getElementById('selectedService').value;
   loadStep4Dates(service);
+  updateBookAnotherButton();
+
 });
 
 document.addEventListener('click', async function(e) {
@@ -460,6 +479,7 @@ document.addEventListener('click', async function(e) {
     const card = e.target.closest('.booking-card');
     card.querySelector('.edit-form').style.display = 'block';
     card.classList.add('open-edit');
+    updateBookAnotherButton();
 
   }
 
@@ -467,7 +487,7 @@ document.addEventListener('click', async function(e) {
     const card = e.target.closest('.booking-card');
     card.querySelector('.edit-form').style.display = 'none';
     card.classList.remove('open-edit');
-
+    updateBookAnotherButton();
   }
 
   if (e.target && e.target.classList.contains('save-edit-btn')) {
@@ -500,6 +520,7 @@ document.addEventListener('click', async function(e) {
         card.querySelector('.booking-status').innerText = result.message || 'Booking updated!';
         card.querySelector('.edit-form').style.display = 'none';
         card.classList.remove('open-edit');
+        updateBookAnotherButton();
 
       }
     })
@@ -512,11 +533,14 @@ document.addEventListener('click', async function(e) {
   if (e.target && e.target.classList.contains('cancel-booking-btn')) {
     const card = e.target.closest('.booking-card');
     card.querySelector('.confirm-cancel').style.display = 'block';
+    updateBookAnotherButton();
+
   }
 
   if (e.target && e.target.classList.contains('confirm-cancel-no')) {
     const confirmBox = e.target.closest('.confirm-cancel');
     confirmBox.style.display = 'none';
+    updateBookAnotherButton();
   }
 
   if (e.target && e.target.classList.contains('confirm-cancel-yes')) {
@@ -537,6 +561,7 @@ document.addEventListener('click', async function(e) {
     .then(cancelResult => {
       card.querySelector('.booking-status').innerText = cancelResult.message || 'Booking cancelled!';
       card.querySelector('.confirm-cancel').style.display = 'none';
+      updateBookAnotherButton();
     })
     .catch(error => {
       console.error('Cancel error:', error);
@@ -589,7 +614,30 @@ function loadStep4Dates(service) {
     renderTimeSlots(slots);
     updateConfirmButtonState();
   };
+
+  // === Restore toggle switch behavior ===
+  const toggleSwitch = document.getElementById('toggleCustomDateSwitch');
+  const toggleLabel = document.getElementById('toggleLabel');
+  const calendarSection = document.querySelector('.date-nav');
+  const customDateSection = document.querySelector('.custom-date');
+
+  toggleSwitch.checked = false;
+  customDateSection.style.display = 'none';
+  calendarSection.style.display = 'flex';
+
+  toggleSwitch.onchange = () => {
+    if (toggleSwitch.checked) {
+      customDateSection.style.display = 'block';
+      calendarSection.style.display = 'none';
+      toggleLabel.textContent = 'Back to Week View';
+    } else {
+      customDateSection.style.display = 'none';
+      calendarSection.style.display = 'flex';
+      toggleLabel.textContent = 'Choose Custom Date';
+    }
+  };
 }
+
 
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -619,6 +667,8 @@ document.getElementById('backToStep2').addEventListener('click', function() {
 
 document.getElementById('bookAnotherFrom5').addEventListener('click', function() {
   showStep('.step-1');
+  updateBookAnotherButton();
+
 });
 
 document.querySelector('.step-2 .back-btn').addEventListener('click', function() {
@@ -638,6 +688,8 @@ function updateConfirmButtonState() {
 }
 
 });
+
+
 </script>
 
 

@@ -220,6 +220,13 @@ nav .btn:hover {
   text-align: center;
 }
 
+#bookAnotherFrom3.disabled {
+  background: #ccc !important;
+  color: #888 !important;
+  cursor: not-allowed;
+}
+
+
 .appointment-card {
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -410,7 +417,7 @@ nav .btn:hover {
 }
 
 .booking-actions button {
-  background-color: #1e90ff;
+  background-color: #253551;
   color: white;
   border: none;
   padding: 0.4rem 0.8rem;
