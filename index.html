@@ -378,10 +378,16 @@ function showStep(stepClass) {
 }
 
 function formatTime24to12(timeStr) {
-  if (!timeStr || !timeStr.includes(':')) {
+  if (!timeStr) {
     return 'Invalid Time';
   }
 
+  // If timeStr already has AM/PM, just return it (cleaned)
+  if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
+    return timeStr.toUpperCase().replace(/\s+/, ' ').trim();
+  }
+
+  // Otherwise, assume it's "HH:mm"
   const [hour, minute] = timeStr.split(':').map(Number);
   if (isNaN(hour) || isNaN(minute)) {
     return 'Invalid Time';
@@ -391,6 +397,7 @@ function formatTime24to12(timeStr) {
   const hour12 = hour % 12 || 12;
   return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
 }
+
 
 
 
