@@ -1128,3 +1128,24 @@ footer {
   border-color: #000;
   box-shadow: 0 0 0 2px rgba(37, 53, 81, 0.2);
 }
+
+@media screen and (min-width: 768px), screen and (max-width: 1511px) and (orientation: landscape) {
+    h1 {
+        font-size: calc(2.5rem + 2vw);
+    }
+    h2 {
+        font-size: calc(2rem + 1.5vw);
+    }
+    h3 {
+        font-size: calc(1.8rem + 1vw);
+    }
+    h4 {
+        font-size: calc(1.5rem + 0.8vw);
+    }
+    h5 {
+        font-size: calc(1.2rem + 0.5vw);
+    }
+    h6 {
+        font-size: calc(1rem + 0.3vw);
+    }
+}
