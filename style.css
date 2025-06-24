@@ -89,6 +89,13 @@ nav .btn:hover {
   font-weight: 400;
 }
 
+/* Fix for two-column sections like #about and #contact */
+.two-column .column-left h3,
+.two-column .column-left p {
+  text-align: left;
+}
+
+
 .container {
   max-width: 1200px;
   margin: auto;
