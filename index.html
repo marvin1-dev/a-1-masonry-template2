@@ -487,57 +487,60 @@ document.getElementById('bookAnotherFrom3').addEventListener('click', function()
 document.addEventListener('click', async function(e) {
 
     if (e.target && e.target.classList.contains('edit-booking-btn')) {
-    const card = e.target.closest('.booking-card');
-    card.querySelector('.edit-form').style.display = 'block';
-    card.classList.add('open-edit');
-    updateBookAnotherButton();
+        const card = e.target.closest('.booking-card');
+        card.querySelector('.edit-form').style.display = 'block';
+        card.classList.add('open-edit');
+        updateBookAnotherButton();
 
-    // === populate available times
-    const editDateInput = card.querySelector('.edit-date');
-    const editTimeSelect = card.querySelector('.edit-time');
+        const editDateInput = card.querySelector('.edit-date');
+        const editTimeSelect = card.querySelector('.edit-time');
+        const service = card.querySelector('.edit-booking-btn').getAttribute('data-service');
 
-    const selectedDate = editDateInput.value;
+        // === First, load dates for this service
+        loadAvailableDates(service).then(() => {
+            const selectedDate = editDateInput.value;
+            const availableSlots = availableDatesGlobal.find(d => d.date === selectedDate)?.slots || [];
 
-    const availableSlots = availableDatesGlobal.find(d => d.date === selectedDate)?.slots || [];
+            editTimeSelect.innerHTML = '';
 
-    editTimeSelect.innerHTML = '';
-
-    if (availableSlots.length > 0) {
-        availableSlots.forEach(timeStr => {
-        const option = document.createElement('option');
-        option.value = timeStr;
-        option.textContent = timeStr;
-        editTimeSelect.appendChild(option);
+            if (availableSlots.length > 0) {
+                availableSlots.forEach(timeStr => {
+                    const option = document.createElement('option');
+                    option.value = timeStr;
+                    option.textContent = timeStr;
+                    editTimeSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No available times';
+                editTimeSelect.appendChild(option);
+            }
         });
-    } else {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'No available times';
-        editTimeSelect.appendChild(option);
+
+        // === Update dropdown when user changes date
+        editDateInput.addEventListener('change', () => {
+            const newDate = editDateInput.value;
+            const availableSlots = availableDatesGlobal.find(d => d.date === newDate)?.slots || [];
+
+            editTimeSelect.innerHTML = '';
+
+            if (availableSlots.length > 0) {
+                availableSlots.forEach(timeStr => {
+                    const option = document.createElement('option');
+                    option.value = timeStr;
+                    option.textContent = timeStr;
+                    editTimeSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No available times';
+                editTimeSelect.appendChild(option);
+            }
+        });
     }
 
-    // === OPTIONAL: If user changes date dropdown, update times again
-    editDateInput.addEventListener('change', () => {
-        const newDate = editDateInput.value;
-        const newSlots = availableDatesGlobal.find(d => d.date === newDate)?.slots || [];
-
-        editTimeSelect.innerHTML = '';
-
-        if (newSlots.length > 0) {
-        newSlots.forEach(timeStr => {
-            const option = document.createElement('option');
-            option.value = timeStr;
-            option.textContent = timeStr;
-            editTimeSelect.appendChild(option);
-        });
-        } else {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'No available times';
-        editTimeSelect.appendChild(option);
-        }
-    });
-    }
 
 
   if (e.target && e.target.classList.contains('cancel-edit-btn')) {
